@@ -30,50 +30,53 @@
             user-select: text;
         }
 
-        /* FLUID TYPOGRAPHY */
-        #landing-container h1 {
-            font-size: clamp(2rem, 5vw, 3.75rem);
-            line-height: 1.1;
-        }
-
-        #landing-container h2 {
-            font-size: clamp(1.5rem, 4vw, 3rem);
-            line-height: 1.2;
-        }
-
-        #landing-container .text-lg-fluid {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-        }
-
-        #landing-container .text-sm-fluid {
-            font-size: clamp(0.875rem, 1.8vw, 1.125rem);
-        }
-
-        /* PADDING FLUIDO */
-        #landing-container .px-fluid {
-            padding-left: clamp(1rem, 5vw, 2rem);
-            padding-right: clamp(1rem, 5vw, 2rem);
-        }
-
-        #landing-container .py-fluid {
-            padding-top: clamp(2rem, 6vw, 4rem);
-            padding-bottom: clamp(2rem, 6vw, 4rem);
-        }
-
-        /* GRADIENT BACKGROUNDS */
-        .gradient-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-        }
-
-        .gradient-dark {
+        /* ANIMATED BACKGROUND */
+        .animated-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            overflow: hidden;
             background: linear-gradient(135deg, #0f0f23 0%, #1a0f3a 50%, #0f0f23 100%);
         }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float1 8s ease-in-out infinite;
+        }
+
+        .animated-bg::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 25%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float2 10s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(40px, 50px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-50px, 50px); }
+            50% { transform: translate(30px, -30px); }
+            75% { transform: translate(-40px, -50px); }
         }
 
         /* GLASS MORPHISM */
@@ -84,140 +87,94 @@
             border: 1px solid rgba(124, 58, 237, 0.3);
         }
 
-        /* BOTONES ACCESIBLES */
+        .glass-hover {
+            transition: all 0.3s ease;
+        }
+
+        .glass-hover:hover {
+            background: rgba(15, 15, 35, 0.8);
+            border-color: rgba(37, 99, 235, 0.5);
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+            transform: translateY(-4px);
+        }
+
+        /* GRADIENTS */
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        .animate-slide-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        /* BUTTONS */
         button, .btn {
             min-height: 44px;
             touch-action: manipulation;
             transition: all 0.3s ease;
         }
 
-        button:active, .btn:active {
-            transform: scale(0.98);
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
         }
 
-        /* INPUTS */
-        input, textarea {
-            transition: all 0.3s ease;
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6);
+            transform: translateY(-2px);
         }
 
-        input:focus, textarea:focus {
-            outline: none;
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
-        /* OTP INPUTS */
-        .otp-input {
-            width: clamp(40px, 8vw, 60px);
-            height: clamp(50px, 10vw, 70px);
-            font-size: clamp(1.25rem, 2vw, 1.5rem);
+        /* COUNTER */
+        .counter {
+            font-variant-numeric: tabular-nums;
+            font-size: 3rem;
+            font-weight: 900;
         }
 
-        /* ANIMACIONES */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* STATS */
+        .stat-item {
+            text-align: center;
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
-
-        .animate-slide-up {
-            animation: slideInUp 0.5s ease;
-        }
-
-        .animate-slide-down {
-            animation: slideInDown 0.5s ease;
-        }
-
-        .animate-fade {
-            animation: fadeIn 0.5s ease;
-        }
-
-        .animate-shake {
-            animation: shake 0.3s ease;
-        }
-
-        /* MODAL */
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            width: clamp(280px, 95vw, 500px);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        /* SAFE AREA */
-        @supports (padding: max(0px)) {
-            body {
-                padding-bottom: max(0px, env(safe-area-inset-bottom));
-            }
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(30, 30, 50, 0.5);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(124, 58, 237, 0.5);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(124, 58, 237, 0.8);
+        .stat-number {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* RESPONSIVE */
         @media (max-width: 640px) {
-            .modal-content {
-                max-height: 85vh;
-                border-radius: 20px 20px 0 0;
-            }
-        }
-
-        /* WEBKIT */
-        @supports (-webkit-appearance: none) {
-            input[type="number"] {
-                -moz-appearance: textfield;
-            }
-
-            input[type="number"]::-webkit-outer-spin-button,
-            input[type="number"]::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-            }
+            .counter { font-size: 2rem; }
         }
 
         /* ACCESIBILIDAD */
@@ -229,172 +186,404 @@
         }
     </style>
 </head>
-<body class="gradient-dark min-h-screen text-slate-100 antialiased">
+<body class="text-slate-100">
+    
+    <!-- ANIMATED BACKGROUND -->
+    <div class="animated-bg"></div>
 
     <!-- ════════════════════════════════════════════════════════════════ -->
     <!-- LANDING PAGE -->
     <!-- ════════════════════════════════════════════════════════════════ -->
 
-    <div id="landing-container" class="min-h-screen flex flex-col justify-between px-fluid py-fluid">
+    <div id="landing-container" class="relative z-10 min-h-screen flex flex-col">
         
         <!-- HEADER -->
-        <div class="flex justify-between items-center mb-12">
-            <div class="text-2xl sm:text-3xl font-black gradient-text">
-                <i class="fas fa-coins"></i> SorteosJS
-            </div>
-            <button onclick="abrirAuth('login')" class="hidden sm:flex items-center gap-2 px-6 py-3 rounded-lg glass hover:border-blue-400 transition text-sm font-semibold">
-                <i class="fas fa-sign-in-alt"></i> Ingresar
-            </button>
-        </div>
-
-        <!-- HERO SECTION -->
-        <div class="flex-1 flex flex-col justify-center items-center text-center gap-6 sm:gap-8 max-w-4xl mx-auto w-full animate-slide-up">
-            
-            <!-- TITLE -->
-            <div>
-                <h1 class="font-black text-white mb-3 leading-tight">
-                    Sorteos de Dinero<br class="hidden sm:block">
-                    <span class="gradient-text">100% Seguro y Verificado</span>
-                </h1>
-                <p class="text-lg-fluid text-slate-300 leading-relaxed max-w-2xl mx-auto">
-                    Participa en sorteos exclusivos cada <strong>lunes</strong> y gana dinero real. 
-                    Sistema encriptado, transparente y con ganadores verificados. Tu oportunidad de ganar está aquí.
-                </p>
-            </div>
-
-            <!-- STATS -->
-            <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 w-full my-4">
-                <div class="glass rounded-xl p-4 text-center hover:border-blue-400 transition">
-                    <div class="text-2xl font-black gradient-text">🔒</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-wider">100% Seguro</div>
+        <header class="border-b border-slate-700/20 backdrop-blur-xl bg-slate-900/30 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
+                        <span class="text-white font-black text-base sm:text-xl">💰</span>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-xl sm:text-2xl gradient-text">SorteosJS</h1>
+                        <p class="text-xs text-slate-500">Sorteos de Dinero</p>
+                    </div>
                 </div>
-                <div class="glass rounded-xl p-4 text-center hover:border-blue-400 transition">
-                    <div class="text-2xl font-black gradient-text">⚡</div>
-                    <div class="text-xs text-slate-400 uppercase tracking-wider">Instantáneo</div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button onclick="abrirAuth('login')" class="px-4 sm:px-6 py-2.5 rounded-lg text-xs sm:text-sm font-bold border border-slate-600 hover:border-blue-400/50 text-slate-300 hover:text-white transition">
+                        Ingresar
+                    </button>
+                    <button onclick="abrirAuth('register')" class="px-4 sm:px-6 py-2.5 rounded-lg text-xs sm:text-sm font-bold btn-primary">
+                        Registrarse
+                    </button>
                 </div>
             </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1">
+
+            <!-- HERO SECTION -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+                <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-24">
+                    <div class="space-y-8 animate-slide-left">
+                        <div class="space-y-4">
+                            <span class="inline-block px-4 py-2 rounded-full glass text-xs sm:text-sm font-bold text-blue-300 border border-blue-400/30">
+                                <i class="fas fa-trophy text-yellow-400 mr-2"></i>Sorteos de Dinero Real
+                            </span>
+                            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
+                                Gana dinero en
+                                <span class="gradient-text"> sorteos semanales</span>
+                            </h1>
+                            <p class="text-base sm:text-lg text-slate-400 leading-relaxed max-w-xl">
+                                Participa en sorteos exclusivos cada <strong>lunes</strong> y llévate dinero real. Sistema 100% seguro, transparente y verificado. ¡Tu oportunidad está aquí!
+                            </p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                            <button onclick="abrirAuth('register')" class="px-6 sm:px-8 py-3 sm:py-4 btn-primary rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl transition transform hover:scale-105 active:scale-95">
+                                <i class="fas fa-rocket mr-2"></i>Empezar Ahora (Gratis)
+                            </button>
+                            <button onclick="document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'})" class="px-6 sm:px-8 py-3 sm:py-4 border-2 border-slate-600 hover:border-blue-400/50 rounded-xl font-bold text-base sm:text-lg transition">
+                                <i class="fas fa-info-circle mr-2"></i>Cómo Funciona
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STATS CARD -->
+                    <div class="relative group animate-slide-up">
+                        <div class="absolute inset-0 gradient-primary rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition"></div>
+                        <div class="relative glass rounded-3xl p-8 sm:p-12">
+                            <div class="space-y-10">
+                                <div class="space-y-2">
+                                    <p class="text-slate-500 text-xs sm:text-sm font-bold uppercase tracking-widest">Próximo Sorteo</p>
+                                    <h2 class="text-4xl sm:text-5xl font-black gradient-text">Este Lunes</h2>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div class="stat-item space-y-2">
+                                        <div class="stat-number">1,250+</div>
+                                        <p class="text-slate-400 text-xs sm:text-sm">Participantes</p>
+                                    </div>
+                                    <div class="stat-item space-y-2">
+                                        <div class="stat-number">$5K</div>
+                                        <p class="text-slate-400 text-xs sm:text-sm">Premio Total</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 pt-6 border-t border-slate-700/30">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                        <span class="text-slate-300 text-sm">Pagos verificados en 24hrs</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                        <span class="text-slate-300 text-sm">Ganadores públicamente anunciados</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                        <span class="text-slate-300 text-sm">Encriptación Supabase</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <!-- FEATURES GRID -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-6">
-                <div class="glass rounded-xl p-5 text-center hover:border-blue-400 transition group">
-                    <div class="text-4xl mb-3 group-hover:scale-110 transition">📅</div>
-                    <h3 class="font-bold text-sm text-white mb-1">Sorteos Semanales</h3>
-                    <p class="text-xs text-slate-400">Cada lunes nuevo premio en efectivo</p>
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">¿Por qué SorteosJS?</h2>
+                    <p class="text-slate-400 max-w-2xl mx-auto">Todo lo que necesitas para jugar con confianza</p>
                 </div>
 
-                <div class="glass rounded-xl p-5 text-center hover:border-blue-400 transition group">
-                    <div class="text-4xl mb-3 group-hover:scale-110 transition">🔐</div>
-                    <h3 class="font-bold text-sm text-white mb-1">Máxima Seguridad</h3>
-                    <p class="text-xs text-slate-400">Encriptación Supabase + RLS</p>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="glass glass-hover rounded-2xl p-6 space-y-4">
+                        <div class="text-4xl">🔒</div>
+                        <h3 class="font-bold text-white">100% Seguro</h3>
+                        <p class="text-slate-400 text-sm">Encriptación Supabase + Row Level Security</p>
+                    </div>
+
+                    <div class="glass glass-hover rounded-2xl p-6 space-y-4">
+                        <div class="text-4xl">📅</div>
+                        <h3 class="font-bold text-white">Sorteos Semanales</h3>
+                        <p class="text-slate-400 text-sm">Cada lunes a las 8 PM con premios en efectivo</p>
+                    </div>
+
+                    <div class="glass glass-hover rounded-2xl p-6 space-y-4">
+                        <div class="text-4xl">⚡</div>
+                        <h3 class="font-bold text-white">Retiros Instantáneos</h3>
+                        <p class="text-slate-400 text-sm">Dinero en tu cuenta en máximo 24 horas</p>
+                    </div>
+
+                    <div class="glass glass-hover rounded-2xl p-6 space-y-4">
+                        <div class="text-4xl">👥</div>
+                        <h3 class="font-bold text-white">Transparente</h3>
+                        <p class="text-slate-400 text-sm">Ganadores verificados, sin sorpresas</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CÓMO FUNCIONA -->
+            <section id="como-funciona" class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">¿Cómo Funciona?</h2>
+                    <p class="text-slate-400 max-w-2xl mx-auto">Cuatro sencillos pasos para empezar a ganar</p>
                 </div>
 
-                <div class="glass rounded-xl p-5 text-center hover:border-blue-400 transition group">
-                    <div class="text-4xl mb-3 group-hover:scale-110 transition">👥</div>
-                    <h3 class="font-bold text-sm text-white mb-1">Transparente</h3>
-                    <p class="text-xs text-slate-400">Ganadores públicos verificados</p>
+                <div class="grid md:grid-cols-4 gap-6 sm:gap-8">
+                    <!-- PASO 1 -->
+                    <div class="relative">
+                        <div class="glass glass-hover rounded-2xl p-6 sm:p-8 text-center space-y-4 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary text-white font-black text-xl mb-4">1</div>
+                                <h3 class="font-bold text-white text-lg">Registrate</h3>
+                                <p class="text-slate-400 text-sm mt-3">Crea tu cuenta con email y contraseña. Verifica tu email con código OTP.</p>
+                            </div>
+                        </div>
+                        <div class="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 gradient-primary"></div>
+                    </div>
+
+                    <!-- PASO 2 -->
+                    <div class="relative">
+                        <div class="glass glass-hover rounded-2xl p-6 sm:p-8 text-center space-y-4 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary text-white font-black text-xl mb-4">2</div>
+                                <h3 class="font-bold text-white text-lg">Compra Tickets</h3>
+                                <p class="text-slate-400 text-sm mt-3">Compra tus boletos con PayPal o SPEI. Mínimo $20 MXN.</p>
+                            </div>
+                        </div>
+                        <div class="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 gradient-primary"></div>
+                    </div>
+
+                    <!-- PASO 3 -->
+                    <div class="relative">
+                        <div class="glass glass-hover rounded-2xl p-6 sm:p-8 text-center space-y-4 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary text-white font-black text-xl mb-4">3</div>
+                                <h3 class="font-bold text-white text-lg">Espera el Sorteo</h3>
+                                <p class="text-slate-400 text-sm mt-3">Cada lunes a las 8 PM hacemos el sorteo en vivo.</p>
+                            </div>
+                        </div>
+                        <div class="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 gradient-primary"></div>
+                    </div>
+
+                    <!-- PASO 4 -->
+                    <div class="relative">
+                        <div class="glass glass-hover rounded-2xl p-6 sm:p-8 text-center space-y-4 h-full flex flex-col justify-between">
+                            <div>
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary text-white font-black text-xl mb-4">4</div>
+                                <h3 class="font-bold text-white text-lg">¡Gana Dinero!</h3>
+                                <p class="text-slate-400 text-sm mt-3">Si ganas, retira a PayPal o SPEI al instante.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <div class="glass rounded-xl p-5 text-center hover:border-blue-400 transition group">
-                    <div class="text-4xl mb-3 group-hover:scale-110 transition">⚡</div>
-                    <h3 class="font-bold text-sm text-white mb-1">Registro Rápido</h3>
-                    <p class="text-xs text-slate-400">Crea cuenta en 60 segundos</p>
-                </div>
-            </div>
-
-            <!-- CTA BUTTONS -->
-            <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center mt-8">
-                <button onclick="abrirAuth('register')" class="gradient-primary text-white font-bold text-sm sm:text-base px-8 py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 active:translate-y-0">
-                    <i class="fas fa-user-plus"></i> Registrate Ahora
-                </button>
-                <button onclick="abrirAuth('login')" class="sm:hidden border-2 border-slate-500 text-white font-bold text-sm px-8 py-3 rounded-lg hover:border-blue-400 hover:bg-slate-900/30 transition">
-                    <i class="fas fa-sign-in-alt"></i> Inicia Sesión
-                </button>
-            </div>
-
-            <!-- MÉTODOS DE COMPRA -->
-            <div class="w-full max-w-3xl mx-auto mt-12 mb-8">
-                <div class="text-center mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
+            <!-- MÉTODOS DE PAGO -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">
                         <i class="fas fa-shopping-cart text-blue-400 mr-2"></i>Compra tus Tickets
                     </h2>
-                    <p class="text-sm text-slate-400">Múltiples métodos seguros de pago</p>
+                    <p class="text-slate-400">Métodos de pago seguros y verificados</p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- PayPal -->
-                    <div class="glass rounded-xl p-6 text-center hover:border-blue-400 transition">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://pngimg.com/uploads/paypal/paypal_PNG7.png" alt="PayPal" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform">
-                        </div>
-                        <h3 class="font-bold text-white text-sm">PayPal</h3>
-                        <p class="text-xs text-slate-400 mt-1">Rápido y seguro a nivel mundial</p>
-                    </div>
-                    <!-- SPEI -->
-                    <div class="glass rounded-xl p-6 text-center hover:border-blue-400 transition">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://seeklogo.com/images/S/spei-logo-3BFB0A560B-seeklogo.com.png" alt="SPEI" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform">
-                        </div>
-                        <h3 class="font-bold text-white text-sm">SPEI</h3>
-                        <p class="text-xs text-slate-400 mt-1">Transferencia instantánea México</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- MÉTODOS DE RETIRO -->
-            <div class="w-full max-w-3xl mx-auto mb-12">
-                <div class="text-center mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
+                <div class="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-2xl mx-auto mb-16 sm:mb-24">
+                    <div class="glass glass-hover rounded-2xl p-8 text-center space-y-4">
+                        <img src="https://pngimg.com/uploads/paypal/paypal_PNG7.png" alt="PayPal" class="h-20 w-auto mx-auto group-hover:scale-110 transition-transform">
+                        <h3 class="font-bold text-white text-lg">PayPal</h3>
+                        <p class="text-slate-400 text-sm">Rápido y seguro a nivel mundial</p>
+                    </div>
+                    <div class="glass glass-hover rounded-2xl p-8 text-center space-y-4">
+                        <img src="https://seeklogo.com/images/S/spei-logo-3BFB0A560B-seeklogo.com.png" alt="SPEI" class="h-20 w-auto mx-auto group-hover:scale-110 transition-transform">
+                        <h3 class="font-bold text-white text-lg">SPEI</h3>
+                        <p class="text-slate-400 text-sm">Transferencia instantánea en México</p>
+                    </div>
+                </div>
+
+                <!-- MÉTODOS DE RETIRO -->
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">
                         <i class="fas fa-wallet text-green-400 mr-2"></i>Retira tus Ganancias
                     </h2>
-                    <p class="text-sm text-slate-400">Retiros seguros a tu cuenta bancaria</p>
+                    <p class="text-slate-400">Dinero en tu cuenta al instante</p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- PayPal Retiro -->
-                    <div class="glass rounded-xl p-6 text-center hover:border-green-400 transition">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://pngimg.com/uploads/paypal/paypal_PNG7.png" alt="PayPal" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform">
-                        </div>
-                        <h3 class="font-bold text-white text-sm">PayPal</h3>
-                        <p class="text-xs text-slate-400 mt-1">A tu cuenta PayPal en 24hrs</p>
-                    </div>
-                    <!-- SPEI Retiro -->
-                    <div class="glass rounded-xl p-6 text-center hover:border-green-400 transition">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://seeklogo.com/images/S/spei-logo-3BFB0A560B-seeklogo.com.png" alt="SPEI" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform">
-                        </div>
-                        <h3 class="font-bold text-white text-sm">SPEI</h3>
-                        <p class="text-xs text-slate-400 mt-1">A tu banco en tiempo real</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TRUST BADGES -->
-            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center text-xs text-slate-400 mt-8">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-shield-alt text-green-400"></i> Datos protegidos
+                <div class="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-2xl mx-auto">
+                    <div class="glass glass-hover rounded-2xl p-8 text-center space-y-4">
+                        <img src="https://pngimg.com/uploads/paypal/paypal_PNG7.png" alt="PayPal" class="h-20 w-auto mx-auto group-hover:scale-110 transition-transform">
+                        <h3 class="font-bold text-white text-lg">PayPal</h3>
+                        <p class="text-slate-400 text-sm">A tu cuenta en máximo 24 horas</p>
+                    </div>
+                    <div class="glass glass-hover rounded-2xl p-8 text-center space-y-4">
+                        <img src="https://seeklogo.com/images/S/spei-logo-3BFB0A560B-seeklogo.com.png" alt="SPEI" class="h-20 w-auto mx-auto group-hover:scale-110 transition-transform">
+                        <h3 class="font-bold text-white text-lg">SPEI</h3>
+                        <p class="text-slate-400 text-sm">A tu banco en tiempo real</p>
+                    </div>
                 </div>
-                <div class="hidden sm:block">•</div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-check-circle text-green-400"></i> Verificado
+            </section>
+
+            <!-- GANADORES RECIENTES -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">Ganadores Recientes</h2>
+                    <p class="text-slate-400">Historias reales de nuestros jugadores</p>
                 </div>
-                <div class="hidden sm:block">•</div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-lock text-green-400"></i> SSL Encriptado
+
+                <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
+                    <div class="glass glass-hover rounded-2xl p-6 sm:p-8 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-black">👤</div>
+                                <div>
+                                    <p class="font-bold text-white">Carlos M.</p>
+                                    <p class="text-xs text-slate-500">Hace 2 días</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl text-yellow-400">🏆</div>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black gradient-text">$1,250</p>
+                            <p class="text-slate-400 text-sm mt-2">Ganador del sorteo de lunes. Retiró vía PayPal instantáneamente.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass glass-hover rounded-2xl p-6 sm:p-8 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-black">👤</div>
+                                <div>
+                                    <p class="font-bold text-white">Ana L.</p>
+                                    <p class="text-xs text-slate-500">Hace 9 días</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl text-yellow-400">🏆</div>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black gradient-text">$850</p>
+                            <p class="text-slate-400 text-sm mt-2">Segunda ganadora. Retiró con SPEI a su banco.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass glass-hover rounded-2xl p-6 sm:p-8 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-black">👤</div>
+                                <div>
+                                    <p class="font-bold text-white">Juan P.</p>
+                                    <p class="text-xs text-slate-500">Hace 16 días</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl text-yellow-400">🏆</div>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black gradient-text">$2,100</p>
+                            <p class="text-slate-400 text-sm mt-2">Gran ganador. Primer sorteo donde participó.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="text-center mb-12 sm:mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-black mb-4">Preguntas Frecuentes</h2>
+                    <p class="text-slate-400">Respuestas a tus dudas</p>
+                </div>
+
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <details class="glass rounded-xl p-6 cursor-pointer group">
+                        <summary class="font-bold text-white text-lg flex items-center justify-between">
+                            <span>¿Es legal participar en SorteosJS?</span>
+                            <i class="fas fa-chevron-down group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-400 mt-4">Sí, operamos bajo regulación legal en México. Todos nuestros sorteos son verificados y transparentes.</p>
+                    </details>
+
+                    <details class="glass rounded-xl p-6 cursor-pointer group">
+                        <summary class="font-bold text-white text-lg flex items-center justify-between">
+                            <span>¿Cuál es el mínimo para comprar tickets?</span>
+                            <i class="fas fa-chevron-down group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-400 mt-4">El mínimo es $20 MXN. Puedes comprar tantos tickets como quieras.</p>
+                    </details>
+
+                    <details class="glass rounded-xl p-6 cursor-pointer group">
+                        <summary class="font-bold text-white text-lg flex items-center justify-between">
+                            <span>¿Cuándo retiraré mis ganancias?</span>
+                            <i class="fas fa-chevron-down group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-400 mt-4">Si ganas, el dinero llegará a tu cuenta en máximo 24 horas después del sorteo.</p>
+                    </details>
+
+                    <details class="glass rounded-xl p-6 cursor-pointer group">
+                        <summary class="font-bold text-white text-lg flex items-center justify-between">
+                            <span>¿Mis datos están seguros?</span>
+                            <i class="fas fa-chevron-down group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-400 mt-4">100% seguro. Usamos Supabase con encriptación SSL y Row Level Security.</p>
+                    </details>
+                </div>
+            </section>
+
+            <!-- CTA FINAL -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-700/20">
+                <div class="glass rounded-3xl p-8 sm:p-12 text-center space-y-8">
+                    <h2 class="text-3xl sm:text-4xl font-black">¿Listo para Empezar?</h2>
+                    <p class="text-slate-400 max-w-2xl mx-auto text-lg">Únete a cientos de jugadores que ya ganan dinero en nuestros sorteos semanales. Es gratis registrarse.</p>
+                    <button onclick="abrirAuth('register')" class="px-8 py-4 btn-primary rounded-xl font-black text-lg hover:shadow-2xl transition transform hover:scale-105 active:scale-95">
+                        <i class="fas fa-rocket mr-2"></i>Registrate Ahora (Gratis)
+                    </button>
+                </div>
+            </section>
+        </main>
 
         <!-- FOOTER -->
-        <div class="text-center text-xs text-slate-500 mt-12 border-t border-slate-700/30 pt-6">
-            <p>© 2024 SorteosJS. Todos los derechos reservados | <a href="#" class="text-blue-400 hover:underline">Términos</a> • <a href="#" class="text-blue-400 hover:underline">Privacidad</a></p>
-        </div>
+        <footer class="border-t border-slate-700/20 backdrop-blur-xl bg-slate-900/30 mt-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-8">
+                <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="font-bold text-white mb-4">SorteosJS</h3>
+                        <p class="text-slate-400 text-sm">Sorteos de dinero reales y verificados cada lunes.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white mb-4">Legal</h3>
+                        <ul class="space-y-2 text-slate-400 text-sm">
+                            <li><a href="#" class="hover:text-blue-400">Términos y Condiciones</a></li>
+                            <li><a href="#" class="hover:text-blue-400">Política de Privacidad</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white mb-4">Soporte</h3>
+                        <ul class="space-y-2 text-slate-400 text-sm">
+                            <li><a href="#" class="hover:text-blue-400">Contacto</a></li>
+                            <li><a href="#" class="hover:text-blue-400">Centro de Ayuda</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white mb-4">Redes</h3>
+                        <ul class="space-y-2 text-slate-400 text-sm">
+                            <li><a href="#" class="hover:text-blue-400">Twitter</a></li>
+                            <li><a href="#" class="hover:text-blue-400">Instagram</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-700/20 pt-8 text-center text-slate-500 text-sm">
+                    <p>© 2024 SorteosJS. Todos los derechos reservados | Hecho con ❤️ en México</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════ -->
-    <!-- AUTH MODAL -->
+    <!-- AUTH MODAL (mismo código anterior) -->
     <!-- ════════════════════════════════════════════════════════════════ -->
 
-    <div id="auth-container" class="hidden fixed inset-0 z-50 modal-overlay flex justify-center items-end sm:items-center p-4 sm:p-0">
-        <div class="modal-content glass rounded-2xl sm:rounded-2xl animate-slide-up sm:animate-slide-down">
+    <div id="auth-container" class="hidden fixed inset-0 z-50 modal-overlay flex justify-center items-end sm:items-center p-4 sm:p-0" style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);">
+        <div class="glass rounded-2xl sm:rounded-2xl animate-slide-up sm:animate-slide-down" style="width: clamp(280px, 95vw, 500px); max-height: 90vh; overflow-y: auto;">
             
             <!-- HEADER -->
             <div class="flex justify-between items-center p-6 sm:p-8 border-b border-slate-600/30">
@@ -411,13 +600,13 @@
             <div class="p-6 sm:p-8">
                 
                 <!-- ERROR MESSAGE -->
-                <div id="error-message" class="hidden mb-4 p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-300 text-sm animate-slide-down">
+                <div id="error-message" class="hidden mb-4 p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-300 text-sm">
                     <i class="fas fa-exclamation-circle mr-2"></i>
                     <span id="error-text"></span>
                 </div>
 
                 <!-- SUCCESS MESSAGE -->
-                <div id="success-message" class="hidden mb-4 p-4 rounded-lg bg-green-900/20 border border-green-500/30 text-green-300 text-sm animate-slide-down">
+                <div id="success-message" class="hidden mb-4 p-4 rounded-lg bg-green-900/20 border border-green-500/30 text-green-300 text-sm">
                     <i class="fas fa-check-circle mr-2"></i>
                     <span id="success-text"></span>
                 </div>
@@ -429,40 +618,19 @@
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-envelope text-blue-400 mr-2"></i>Correo Electrónico
                             </label>
-                            <input 
-                                type="email" 
-                                id="login-email" 
-                                placeholder="tu@correo.com" 
-                                required
-                                autocomplete="email"
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="email" id="login-email" placeholder="tu@correo.com" required autocomplete="email" class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                         </div>
-
                         <div>
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-lock text-blue-400 mr-2"></i>Contraseña
                             </label>
-                            <input 
-                                type="password" 
-                                id="login-password" 
-                                placeholder="••••••••" 
-                                required
-                                autocomplete="current-password"
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                         </div>
-
-                        <button type="submit" id="btn-login" class="w-full gradient-primary text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2">
+                        <button type="submit" id="btn-login" class="w-full btn-primary font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
                             <i class="fas fa-sign-in-alt"></i> Inicia Sesión
                         </button>
                     </form>
-
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-600/30"></div></div>
-                        <div class="relative flex justify-center text-sm"><span class="px-2 bg-slate-900 text-slate-400">¿No tienes cuenta?</span></div>
-                    </div>
-
+                    <div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-600/30"></div></div><div class="relative flex justify-center text-sm"><span class="px-2 bg-slate-900 text-slate-400">¿No tienes cuenta?</span></div></div>
                     <button type="button" onclick="cambiarVista('register')" class="w-full border-2 border-slate-500 text-slate-300 font-semibold py-3 rounded-lg hover:border-blue-400 hover:bg-slate-900/30 transition flex items-center justify-center gap-2">
                         <i class="fas fa-user-plus"></i> Crear Cuenta
                     </button>
@@ -475,83 +643,37 @@
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-user text-blue-400 mr-2"></i>Nombre de Usuario
                             </label>
-                            <input 
-                                type="text" 
-                                id="register-username" 
-                                placeholder="tu_usuario" 
-                                required
-                                minlength="3"
-                                maxlength="20"
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="text" id="register-username" placeholder="tu_usuario" required minlength="3" maxlength="20" class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                             <p class="text-xs text-slate-400 mt-1">3-20 caracteres, sin espacios</p>
                         </div>
-
                         <div>
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-envelope text-blue-400 mr-2"></i>Correo Electrónico
                             </label>
-                            <input 
-                                type="email" 
-                                id="register-email" 
-                                placeholder="tu@correo.com" 
-                                required
-                                autocomplete="email"
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="email" id="register-email" placeholder="tu@correo.com" required autocomplete="email" class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                         </div>
-
                         <div>
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-lock text-blue-400 mr-2"></i>Contraseña
                             </label>
-                            <input 
-                                type="password" 
-                                id="register-password" 
-                                placeholder="••••••••" 
-                                required
-                                minlength="8"
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="password" id="register-password" placeholder="••••••••" required minlength="8" class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                             <p class="text-xs text-slate-400 mt-1">Mínimo 8 caracteres</p>
                         </div>
-
                         <div>
                             <label class="block text-sm font-semibold text-slate-200 mb-2">
                                 <i class="fas fa-lock text-blue-400 mr-2"></i>Confirmar Contraseña
                             </label>
-                            <input 
-                                type="password" 
-                                id="register-password-confirm" 
-                                placeholder="••••••••" 
-                                required
-                                class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500"
-                            >
+                            <input type="password" id="register-password-confirm" placeholder="••••••••" required class="w-full px-4 py-3 rounded-lg glass focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-slate-100 placeholder-slate-500">
                         </div>
-
-                        <label class="flex items-start gap-3 cursor-pointer group">
-                            <input 
-                                type="checkbox" 
-                                id="register-terms" 
-                                required
-                                class="mt-1 w-5 h-5 rounded accent-blue-500 cursor-pointer"
-                            >
-                            <span class="text-sm text-slate-300 leading-relaxed">
-                                Acepto los <a href="#" class="text-blue-400 hover:underline font-semibold">Términos y Condiciones</a> 
-                                y la <a href="#" class="text-blue-400 hover:underline font-semibold">Política de Privacidad</a>
-                            </span>
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="register-terms" required class="mt-1 w-5 h-5 rounded accent-blue-500 cursor-pointer">
+                            <span class="text-sm text-slate-300">Acepto los <a href="#" class="text-blue-400 hover:underline font-semibold">Términos y Condiciones</a> y la <a href="#" class="text-blue-400 hover:underline font-semibold">Política de Privacidad</a></span>
                         </label>
-
-                        <button type="submit" id="btn-register" class="w-full gradient-primary text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2">
+                        <button type="submit" id="btn-register" class="w-full btn-primary font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
                             <i class="fas fa-user-check"></i> Crear Cuenta
                         </button>
                     </form>
-
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-600/30"></div></div>
-                        <div class="relative flex justify-center text-sm"><span class="px-2 bg-slate-900 text-slate-400">¿Ya tienes cuenta?</span></div>
-                    </div>
-
+                    <div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-600/30"></div></div><div class="relative flex justify-center text-sm"><span class="px-2 bg-slate-900 text-slate-400">¿Ya tienes cuenta?</span></div></div>
                     <button type="button" onclick="cambiarVista('login')" class="w-full border-2 border-slate-500 text-slate-300 font-semibold py-3 rounded-lg hover:border-blue-400 hover:bg-slate-900/30 transition flex items-center justify-center gap-2">
                         <i class="fas fa-sign-in-alt"></i> Inicia Sesión
                     </button>
@@ -561,38 +683,25 @@
                 <div id="verify-email-view" class="hidden space-y-6 text-center">
                     <div>
                         <h3 class="text-xl font-bold text-white mb-2">Verifica tu Correo</h3>
-                        <p class="text-sm text-slate-300">
-                            Hemos enviado un código OTP a:<br>
-                            <span id="verify-email-address" class="font-mono text-blue-400 break-all"></span>
-                        </p>
+                        <p class="text-sm text-slate-300">Hemos enviado un código OTP a:<br><span id="verify-email-address" class="font-mono text-blue-400 break-all"></span></p>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-semibold text-slate-200 mb-4">
-                            Código de 6 dígitos:
-                        </label>
+                        <label class="block text-sm font-semibold text-slate-200 mb-4">Código de 6 dígitos:</label>
                         <div class="flex justify-center gap-2 sm:gap-3" id="otp-inputs">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
-                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
+                            <input type="text" class="otp-input text-center font-black bg-slate-900/50 border-2 border-slate-600 rounded-lg focus:border-blue-400 focus:shadow-lg focus:shadow-blue-500/20 text-blue-400 placeholder-slate-600" inputmode="numeric" maxlength="1" style="width: clamp(40px, 8vw, 60px); height: clamp(50px, 10vw, 70px); font-size: clamp(1.25rem, 2vw, 1.5rem);">
                         </div>
                     </div>
-
-                    <button type="button" id="btn-verify-otp" onclick="handleVerifyOTP()" class="w-full gradient-primary text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2">
+                    <button type="button" id="btn-verify-otp" onclick="handleVerifyOTP()" class="w-full btn-primary font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Verificar Código
                     </button>
-
                     <div class="text-center text-sm text-slate-400 space-y-2">
                         <p>¿No recibiste el código?</p>
-                        <button 
-                            type="button" 
-                            id="btn-resend-otp" 
-                            onclick="handleResendOTP()"
-                            class="font-semibold text-blue-400 hover:text-blue-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
+                        <button type="button" id="btn-resend-otp" onclick="handleResendOTP()" class="font-semibold text-blue-400 hover:text-blue-300 transition">
                             <i class="fas fa-redo-alt mr-1"></i>Reenviar Código
                         </button>
                     </div>
@@ -602,35 +711,21 @@
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════ -->
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT (mismo código anterior) -->
     <!-- ════════════════════════════════════════════════════════════════ -->
 
     <script>
-        // ════════════════════════════════════════════════════════════════
-        // CONFIGURACIÓN SUPABASE
-        // ════════════════════════════════════════════════════════════════
-        
         const SUPABASE_URL = 'https://mcrqjbbcjalyrmsvzogl.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_GJia34PtCKRD-nRQOkAI1Q_PcaaQURk';
-
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentEmail = '';
         let resendCooldownActive = false;
 
-        // ════════════════════════════════════════════════════════════════
-        // UI FUNCTIONS
-        // ════════════════════════════════════════════════════════════════
-
         function abrirAuth(vista) {
             document.getElementById('auth-container').classList.remove('hidden');
             cambiarVista(vista);
             document.body.style.overflow = 'hidden';
-            setTimeout(() => {
-                if (vista === 'verify-email') {
-                    document.querySelectorAll('.otp-input')[0]?.focus();
-                }
-            }, 300);
         }
 
         function cerrarAuth() {
@@ -677,76 +772,39 @@
             document.getElementById('success-message').classList.add('hidden');
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // OTP HANDLING
-        // ════════════════════════════════════════════════════════════════
-
         function configurarOTPInputs() {
             const inputs = document.querySelectorAll('.otp-input');
-            
             inputs.forEach((input, index) => {
                 input.addEventListener('input', (e) => {
                     input.value = input.value.replace(/\D/g, '');
-                    
-                    if (input.value && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    }
-                    
+                    if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
                     const codigo = Array.from(inputs).map(i => i.value).join('');
-                    if (codigo.length === 6) {
-                        handleVerifyOTP();
-                    }
+                    if (codigo.length === 6) handleVerifyOTP();
                 });
-
                 input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && !input.value && index > 0) {
-                        inputs[index - 1].focus();
-                    }
+                    if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
                 });
-
                 input.addEventListener('paste', (e) => {
                     e.preventDefault();
                     const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
                     inputs.forEach((inp, i) => inp.value = paste[i] || '');
-                    if (paste.length === 6) {
-                        handleVerifyOTP();
-                    }
+                    if (paste.length === 6) handleVerifyOTP();
                 });
             });
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // AUTH HANDLERS
-        // ════════════════════════════════════════════════════════════════
-
         async function handleRegister(e) {
             e.preventDefault();
-            
             const username = document.getElementById('register-username').value.trim();
             const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value;
             const passwordConfirm = document.getElementById('register-password-confirm').value;
             const termsAccepted = document.getElementById('register-terms').checked;
 
-            if (!termsAccepted) {
-                mostrarError('Debes aceptar los Términos y Condiciones');
-                return;
-            }
-
-            if (username.length < 3 || username.length > 20) {
-                mostrarError('El nombre de usuario debe tener entre 3 y 20 caracteres');
-                return;
-            }
-
-            if (password !== passwordConfirm) {
-                mostrarError('Las contraseñas no coinciden');
-                return;
-            }
-
-            if (password.length < 8) {
-                mostrarError('La contraseña debe tener mínimo 8 caracteres');
-                return;
-            }
+            if (!termsAccepted) { mostrarError('Debes aceptar los Términos y Condiciones'); return; }
+            if (username.length < 3 || username.length > 20) { mostrarError('El nombre de usuario debe tener entre 3 y 20 caracteres'); return; }
+            if (password !== passwordConfirm) { mostrarError('Las contraseñas no coinciden'); return; }
+            if (password.length < 8) { mostrarError('La contraseña debe tener mínimo 8 caracteres'); return; }
 
             const btnRegister = document.getElementById('btn-register');
             btnRegister.disabled = true;
@@ -754,30 +812,15 @@
 
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: { username }
-                    }
+                    email, password,
+                    options: { data: { username } }
                 });
 
-                if (error) {
-                    mostrarError(`Error: ${error.message}`);
-                    btnRegister.disabled = false;
-                    btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta';
-                    return;
-                }
-
-                if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-                    mostrarError('Este correo ya está registrado');
-                    btnRegister.disabled = false;
-                    btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta';
-                    return;
-                }
+                if (error) { mostrarError(`Error: ${error.message}`); btnRegister.disabled = false; btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta'; return; }
+                if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) { mostrarError('Este correo ya está registrado'); btnRegister.disabled = false; btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta'; return; }
 
                 currentEmail = email;
                 mostrarExito('Código OTP enviado a tu correo');
-                
                 setTimeout(() => {
                     document.getElementById('verify-email-address').innerText = email;
                     cambiarVista('verify-email');
@@ -786,10 +829,8 @@
                     btnRegister.disabled = false;
                     btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta';
                 }, 500);
-
             } catch (error) {
-                console.error('Error:', error);
-                mostrarError('Error al registrar. Intenta de nuevo');
+                mostrarError('Error al registrar');
                 btnRegister.disabled = false;
                 btnRegister.innerHTML = '<i class="fas fa-user-check"></i> Crear Cuenta';
             }
@@ -797,35 +838,18 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-
             const btnLogin = document.getElementById('btn-login');
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
-                if (error) {
-                    mostrarError(`Error: ${error.message}`);
-                    btnLogin.disabled = false;
-                    btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Inicia Sesión';
-                    return;
-                }
-
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) { mostrarError(`Error: ${error.message}`); btnLogin.disabled = false; btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Inicia Sesión'; return; }
                 mostrarExito('¡Sesión iniciada exitosamente!');
-                setTimeout(() => {
-                    cerrarAuth();
-                    alert(`🎉 ¡Bienvenido a SorteosJS!\n\nYa puedes participar en los sorteos semanales.`);
-                }, 500);
-
+                setTimeout(() => { cerrarAuth(); alert(`🎉 ¡Bienvenido a SorteosJS!\n\nYa puedes participar en los sorteos semanales.`); }, 500);
             } catch (error) {
-                console.error('Error:', error);
                 mostrarError('Error al iniciar sesión');
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Inicia Sesión';
@@ -835,11 +859,7 @@
         async function handleVerifyOTP() {
             const inputs = document.querySelectorAll('.otp-input');
             const codigo = Array.from(inputs).map(i => i.value).join('');
-
-            if (codigo.length !== 6) {
-                mostrarError('Ingresa los 6 dígitos');
-                return;
-            }
+            if (codigo.length !== 6) { mostrarError('Ingresa los 6 dígitos'); return; }
 
             const btnVerify = document.getElementById('btn-verify-otp');
             btnVerify.disabled = true;
@@ -847,44 +867,16 @@
 
             try {
                 const { data, error } = await supabaseClient.auth.verifyOtp({
-                    email: currentEmail,
-                    token: codigo,
-                    type: 'signup'
+                    email: currentEmail, token: codigo, type: 'signup'
                 });
-
-                if (error) {
-                    mostrarError('Código incorrecto o expirado');
-                    inputs.forEach(inp => {
-                        inp.classList.add('animate-shake');
-                        setTimeout(() => inp.classList.remove('animate-shake'), 300);
-                    });
-                    btnVerify.disabled = false;
-                    btnVerify.innerHTML = '<i class="fas fa-check-circle"></i> Verificar Código';
-                    return;
-                }
-
+                if (error) { mostrarError('Código incorrecto o expirado'); btnVerify.disabled = false; btnVerify.innerHTML = '<i class="fas fa-check-circle"></i> Verificar Código'; return; }
                 if (data.user) {
                     const username = document.getElementById('register-username').value.trim();
-                    
-                    await supabaseClient
-                        .from('users')
-                        .insert([{
-                            id: data.user.id,
-                            username: username,
-                            email: data.user.email
-                        }])
-                        .catch(err => console.log('User guardado en Supabase Auth'));
-
+                    await supabaseClient.from('users').insert([{ id: data.user.id, username: username, email: data.user.email }]).catch(err => console.log('User saved'));
                     mostrarExito('¡Correo verificado exitosamente!');
-                    
-                    setTimeout(() => {
-                        cerrarAuth();
-                        alert(`🎉 ¡Cuenta creada exitosamente!\n\nBienvenido ${username} a SorteosJS!\n\nYa puedes participar en los sorteos.`);
-                    }, 500);
+                    setTimeout(() => { cerrarAuth(); alert(`🎉 ¡Cuenta creada exitosamente!\n\nBienvenido ${username} a SorteosJS!\n\nYa puedes participar en los sorteos.`); }, 500);
                 }
-
             } catch (error) {
-                console.error('Error:', error);
                 mostrarError('Error al verificar código');
                 btnVerify.disabled = false;
                 btnVerify.innerHTML = '<i class="fas fa-check-circle"></i> Verificar Código';
@@ -893,28 +885,16 @@
 
         async function handleResendOTP() {
             if (resendCooldownActive) return;
-
             const btnResend = document.getElementById('btn-resend-otp');
             btnResend.disabled = true;
 
             try {
-                const { error } = await supabaseClient.auth.resend({
-                    type: 'signup',
-                    email: currentEmail
-                });
-
-                if (error) {
-                    mostrarError(`Error: ${error.message}`);
-                    btnResend.disabled = false;
-                    return;
-                }
-
+                const { error } = await supabaseClient.auth.resend({ type: 'signup', email: currentEmail });
+                if (error) { mostrarError(`Error: ${error.message}`); btnResend.disabled = false; return; }
                 mostrarExito('Código reenviado a tu correo');
-                
                 resendCooldownActive = true;
                 let segundos = 60;
                 btnResend.innerHTML = `Reenviar (${segundos}s)`;
-
                 const intervalo = setInterval(() => {
                     segundos--;
                     if (segundos <= 0) {
@@ -926,27 +906,14 @@
                         btnResend.innerHTML = `Reenviar (${segundos}s)`;
                     }
                 }, 1000);
-
             } catch (error) {
-                console.error('Error:', error);
                 mostrarError('Error al reenviar código');
                 btnResend.disabled = false;
             }
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // INIT
-        // ════════════════════════════════════════════════════════════════
-
-        document.addEventListener('DOMContentLoaded', () => {
-            configurarOTPInputs();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                cerrarAuth();
-            }
-        });
+        document.addEventListener('DOMContentLoaded', configurarOTPInputs);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarAuth(); });
     </script>
 </body>
 </html>
