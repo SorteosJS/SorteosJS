@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <title>SorteosJS - Sorteos de Dinero Semanales</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%232563eb%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22900%22 font-size=%2250%22 fill=%22white%22>$</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a0f3a 50%, #0f0f23 100%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* LANDING PAGE */
+        /* ════════════════════════════════════════════════════════════════ */
+
+        #landing-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a0f3a 50%, #0f0f23 100%);
+        }
+
+        .landing-hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 2rem;
+        }
+
+        .landing-logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .landing-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            color: #f1f5f9;
+        }
+
+        .landing-subtitle {
+            font-size: clamp(0.95rem, 2.5vw, 1.25rem);
+            color: #cbd5e1;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .landing-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            background: rgba(30, 30, 50, 0.6);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .feature-card i {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .landing-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            touch-action: manipulation;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* MODAL AUTH */
+        /* ════════════════════════════════════════════════════════════════ */
+
+        #auth-container {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        #auth-container.active {
+            display: flex;
+        }
+
+        .auth-modal {
+            background: rgba(15, 15, 35, 0.95);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 16px;
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .auth-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-header h2 {
+            font-size: 1.75rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-close-auth {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close-auth:hover {
+            color: #f1f5f9;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            background: rgba(30, 30, 50, 0.6);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            background: rgba(30, 30, 50, 0.9);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #64748b;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: rgba(30, 30, 50, 0.6);
+            border: 2px solid rgba(124, 58, 237, 0.3);
+            border-radius: 8px;
+            color: #2563eb;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .otp-input:focus {
+            border-color: #2563eb;
+            background: rgba(30, 30, 50, 0.9);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .otp-input.error {
+            border-color: #dc2626;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .form-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #2563eb;
+        }
+
+        .form-checkbox label {
+            margin: 0;
+            cursor: pointer;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+
+        .form-checkbox a {
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .form-checkbox a:hover {
+            color: #7c3aed;
+            text-decoration: underline;
+        }
+
+        .form-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .form-toggle a {
+            color: #2563eb;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .form-toggle a:hover {
+            color: #7c3aed;
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-height: 44px;
+            margin-top: 1.5rem;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+            color: #fca5a5;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #86efac;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .resend-info {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #cbd5e1;
+        }
+
+        .btn-resend {
+            background: none;
+            border: none;
+            color: #2563eb;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-resend:hover:not(:disabled) {
+            color: #7c3aed;
+        }
+
+        .btn-resend:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* RESPONSIVE */
+        /* ════════════════════════════════════════════════════════════════ */
+
+        @media (max-width: 640px) {
+            #landing-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .landing-title {
+                font-size: 2rem;
+            }
+
+            .landing-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .otp-input {
+                width: 45px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* UTILIDADES */
+        /* ════════════════════════════════════════════════════════════════ */
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- LANDING PAGE -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+
+    <div id="landing-container">
+        <div class="landing-hero">
+            <div class="landing-logo">💰 SorteosJS</div>
+            <h1 class="landing-title">Sorteos de Dinero Semanales</h1>
+            <p class="landing-subtitle">
+                Participa en sorteos exclusivos cada lunes y gana dinero real. 
+                Sistema seguro, transparente y verificado. ¡Tu oportunidad de ganar te espera!
+            </p>
+
+            <div class="landing-features">
+                <div class="feature-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Sorteos Semanales</h3>
+                    <p>Cada lunes nuevo sorteo con premios en efectivo</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-lock"></i>
+                    <h3>100% Seguro</h3>
+                    <p>Sistema encriptado y verificado con Supabase</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Transparente</h3>
+                    <p>Sorteos públicos, ganadores verificados</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-zap"></i>
+                    <h3>Instantáneo</h3>
+                    <p>Registro rápido y pagos directos</p>
+                </div>
+            </div>
+
+            <div class="landing-buttons">
+                <button class="btn btn-primary" onclick="abrirAuth('register')">
+                    <i class="fas fa-user-plus"></i> Registrate
+                </button>
+                <button class="btn btn-secondary" onclick="abrirAuth('login')">
+                    <i class="fas fa-sign-in-alt"></i> Inicia Sesión
+                </button>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 0.875rem; color: #64748b; padding-top: 2rem;">
+            <p>🔒 Tus datos están seguros con nosotros</p>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- AUTH MODAL -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+
+    <div id="auth-container">
+        <div class="auth-modal">
+            <div class="auth-header">
+                <h2 id="auth-title">Registrarse</h2>
+                <button class="btn-close-auth" onclick="cerrarAuth()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+
+            <!-- ══ LOGIN VIEW ══ -->
+            <div id="login-view" class="view">
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Correo Electrónico</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            placeholder="tu@correo.com" 
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            placeholder="••••••••" 
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-login">
+                        Iniciar Sesión
+                    </button>
+                </form>
+
+                <div class="form-toggle">
+                    ¿No tienes cuenta? <a onclick="cambiarVista('register')">Registrate aquí</a>
+                </div>
+            </div>
+
+            <!-- ══ REGISTER VIEW ══ -->
+            <div id="register-view" class="view active">
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-username">Nombre de Usuario</label>
+                        <input 
+                            type="text" 
+                            id="register-username" 
+                            placeholder="tu_usuario" 
+                            required
+                            minlength="3"
+                            maxlength="20"
+                        >
+                        <small style="color: #64748b; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                            3-20 caracteres
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-email">Correo Electrónico</label>
+                        <input 
+                            type="email" 
+                            id="register-email" 
+                            placeholder="tu@correo.com" 
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="register-password" 
+                            placeholder="••••••••" 
+                            required
+                            minlength="8"
+                        >
+                        <small style="color: #64748b; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                            Mínimo 8 caracteres
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-password-confirm">Confirmar Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="register-password-confirm" 
+                            placeholder="••••••••" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-checkbox">
+                        <input 
+                            type="checkbox" 
+                            id="register-terms" 
+                            required
+                        >
+                        <label for="register-terms">
+                            Acepto los <a href="#terminos" target="_blank">Términos y Condiciones</a> 
+                            y la <a href="#privacidad" target="_blank">Política de Privacidad</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-register">
+                        Crear Cuenta
+                    </button>
+                </form>
+
+                <div class="form-toggle">
+                    ¿Ya tienes cuenta? <a onclick="cambiarVista('login')">Inicia sesión aquí</a>
+                </div>
+            </div>
+
+            <!-- ══ OTP VERIFICATION VIEW ══ -->
+            <div id="verify-email-view" class="view">
+                <div class="text-center">
+                    <h3 style="color: #f1f5f9; margin-bottom: 0.5rem;">Verifica tu Correo</h3>
+                    <p style="color: #cbd5e1; font-size: 0.9rem;">
+                        Hemos enviado un código OTP a:<br>
+                        <strong id="verify-email-address"></strong>
+                    </p>
+                </div>
+
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: block; color: #e2e8f0; margin-bottom: 1rem; text-align: center;">
+                        Ingresa el código de 6 dígitos:
+                    </label>
+                    <div class="otp-inputs" id="otp-inputs">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                        <input type="text" class="otp-input" inputmode="numeric" maxlength="1">
+                    </div>
+                </div>
+
+                <div id="otp-error" class="error-message"></div>
+
+                <button type="button" class="btn-submit" id="btn-verify-otp" onclick="handleVerifyOTP()">
+                    Verificar Código
+                </button>
+
+                <div class="resend-info">
+                    ¿No recibiste el código?
+                    <button 
+                        type="button" 
+                        class="btn-resend" 
+                        id="btn-resend-otp" 
+                        onclick="handleResendOTP()"
+                    >
+                        Reenviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- JAVASCRIPT -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+
+    <script>
+        // ════════════════════════════════════════════════════════════════
+        // CONFIGURACIÓN SUPABASE
+        // ════════════════════════════════════════════════════════════════
+        // ⚠️ INSTRUCCIONES DE SEGURIDAD:
+        // 1. Reemplaza VITE_SUPABASE_URL con tu URL de Supabase
+        // 2. Reemplaza VITE_SUPABASE_ANON_KEY con tu Anon Key
+        // 3. NUNCA compartas estas credenciales públicamente
+        // 4. Usa variables de entorno en producción
+        
+        const SUPABASE_URL = 'https://mcrqjbbcjalyrmsvzogl.supabase.co'; // Reemplaza aquí
+        const SUPABASE_ANON_KEY = 'sb_publishable_GJia34PtCKRD-nRQOkAI1Q_PcaaQURk'; // Reemplaza aquí
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentEmail = '';
+        let currentUserIdPendingVerification = '';
+
+        // ════════════════════════════════════════════════════════════════
+        // FUNCIONES DE UI
+        // ════════════════════════════════════════════════════════════════
+
+        function abrirAuth(vista) {
+            document.getElementById('auth-container').classList.add('active');
+            cambiarVista(vista);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarAuth() {
+            document.getElementById('auth-container').classList.remove('active');
+            limpiarFormularios();
+            document.body.style.overflow = '';
+        }
+
+        function cambiarVista(vista) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${vista}-view`).classList.add('active');
+            
+            const titulo = {
+                'login': 'Iniciar Sesión',
+                'register': 'Registrarse',
+                'verify-email': 'Verificar Correo'
+            };
+            document.getElementById('auth-title').innerText = titulo[vista] || 'SorteosJS';
+            
+            limpiarMensajes();
+        }
+
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerText = mensaje;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 5000);
+        }
+
+        function mostrarExito(mensaje) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.innerText = mensaje;
+            successDiv.classList.add('show');
+            setTimeout(() => successDiv.classList.remove('show'), 5000);
+        }
+
+        function limpiarMensajes() {
+            document.getElementById('error-message').classList.remove('show');
+            document.getElementById('success-message').classList.remove('show');
+        }
+
+        function limpiarFormularios() {
+            document.getElementById('login-form').reset();
+            document.getElementById('register-form').reset();
+            document.querySelectorAll('.otp-input').forEach(inp => inp.value = '');
+            limpiarMensajes();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // MANEJO DE OTP
+        // ════════════════════════════════════════════════════════════════
+
+        function configurarOTPInputs() {
+            const inputs = document.querySelectorAll('.otp-input');
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    // Solo números
+                    input.value = input.value.replace(/\D/g, '');
+                    
+                    // Mover al siguiente input
+                    if (input.value && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                    
+                    // Auto-verificar si está completo
+                    const codigo = Array.from(inputs).map(i => i.value).join('');
+                    if (codigo.length === 6) {
+                        handleVerifyOTP();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    // Backspace
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                    inputs.forEach((inp, i) => inp.value = paste[i] || '');
+                    if (paste.length === 6) {
+                        handleVerifyOTP();
+                    }
+                });
+            });
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // AUTH HANDLERS
+        // ════════════════════════════════════════════════════════════════
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const termsAccepted = document.getElementById('register-terms').checked;
+
+            // Validaciones
+            if (!termsAccepted) {
+                mostrarError('Debes aceptar los Términos y Condiciones');
+                return;
+            }
+
+            if (username.length < 3 || username.length > 20) {
+                mostrarError('El nombre de usuario debe tener entre 3 y 20 caracteres');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                mostrarError('Las contraseñas no coinciden');
+                return;
+            }
+
+            if (password.length < 8) {
+                mostrarError('La contraseña debe tener mínimo 8 caracteres');
+                return;
+            }
+
+            const btnRegister = document.getElementById('btn-register');
+            btnRegister.disabled = true;
+            btnRegister.innerHTML = '<span class="spinner"></span>Creando cuenta...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            username: username
+                        },
+                        emailRedirectTo: null
+                    }
+                });
+
+                if (error) {
+                    mostrarError(`Error: ${error.message}`);
+                    btnRegister.disabled = false;
+                    btnRegister.innerHTML = 'Crear Cuenta';
+                    return;
+                }
+
+                if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+                    mostrarError('Este correo ya está registrado. Intenta iniciar sesión');
+                    btnRegister.disabled = false;
+                    btnRegister.innerHTML = 'Crear Cuenta';
+                    return;
+                }
+
+                currentEmail = email;
+                currentUserIdPendingVerification = data.user?.id || '';
+
+                mostrarExito('Se ha enviado un código de verificación a tu correo');
+                
+                setTimeout(() => {
+                    document.getElementById('verify-email-address').innerText = email;
+                    cambiarVista('verify-email');
+                    document.querySelectorAll('.otp-input')[0].focus();
+                    configurarOTPInputs();
+                    btnRegister.disabled = false;
+                    btnRegister.innerHTML = 'Crear Cuenta';
+                }, 500);
+
+            } catch (error) {
+                console.error('Error en registro:', error);
+                mostrarError('Error al registrar. Intenta de nuevo');
+                btnRegister.disabled = false;
+                btnRegister.innerHTML = 'Crear Cuenta';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            const btnLogin = document.getElementById('btn-login');
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<span class="spinner"></span>Iniciando sesión...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    mostrarError(`Error: ${error.message}`);
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = 'Iniciar Sesión';
+                    return;
+                }
+
+                if (data.session) {
+                    mostrarExito('¡Sesión iniciada! Redirigiendo...');
+                    setTimeout(() => {
+                        cerrarAuth();
+                        alert(`Bienvenido, ${data.user.user_metadata.username || email}! 🎉\n\nAhora puedes participar en los sorteos.`);
+                    }, 500);
+                }
+
+            } catch (error) {
+                console.error('Error en login:', error);
+                mostrarError('Error al iniciar sesión. Intenta de nuevo');
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = 'Iniciar Sesión';
+            }
+        }
+
+        async function handleVerifyOTP() {
+            const inputs = document.querySelectorAll('.otp-input');
+            const codigo = Array.from(inputs).map(i => i.value).join('');
+
+            if (codigo.length !== 6) {
+                mostrarError('Ingresa los 6 dígitos del código');
+                return;
+            }
+
+            const btnVerify = document.getElementById('btn-verify-otp');
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = '<span class="spinner"></span>Verificando...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.verifyOtp({
+                    email: currentEmail,
+                    token: codigo,
+                    type: 'signup'
+                });
+
+                if (error) {
+                    mostrarError('Código incorrecto o expirado');
+                    inputs.forEach(inp => {
+                        inp.classList.add('error');
+                        setTimeout(() => inp.classList.remove('error'), 1500);
+                    });
+                    btnVerify.disabled = false;
+                    btnVerify.innerHTML = 'Verificar Código';
+                    return;
+                }
+
+                if (data.user) {
+                    mostrarExito('¡Correo verificado exitosamente!');
+                    
+                    // Guardar username en tabla users
+                    const username = document.getElementById('register-username').value.trim();
+                    await supabaseClient
+                        .from('users')
+                        .insert([{
+                            id: data.user.id,
+                            username: username,
+                            email: data.user.email
+                        }])
+                        .catch(err => console.log('Username guardado en auth metadata'));
+
+                    setTimeout(() => {
+                        cerrarAuth();
+                        alert(`¡Cuenta creada exitosamente!\n\nBienvenido a SorteosJS, ${username}! 🎉\n\nYa puedes participar en los sorteos semanales.`);
+                    }, 800);
+                }
+
+            } catch (error) {
+                console.error('Error en verificación OTP:', error);
+                mostrarError('Error al verificar código. Intenta de nuevo');
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = 'Verificar Código';
+            }
+        }
+
+        async function handleResendOTP() {
+            const btnResend = document.getElementById('btn-resend-otp');
+            btnResend.disabled = true;
+            btnResend.innerHTML = '<span class="spinner"></span>Reenviando...';
+
+            try {
+                const { error } = await supabaseClient.auth.resend({
+                    type: 'signup',
+                    email: currentEmail
+                });
+
+                if (error) {
+                    mostrarError(`Error al reenviar: ${error.message}`);
+                    btnResend.disabled = false;
+                    btnResend.innerHTML = 'Reenviar';
+                    return;
+                }
+
+                mostrarExito('Código reenviado a tu correo');
+                iniciarCooldownReenvio(btnResend);
+
+            } catch (error) {
+                console.error('Error reenviando OTP:', error);
+                mostrarError('Error al reenviar código');
+                btnResend.disabled = false;
+                btnResend.innerHTML = 'Reenviar';
+            }
+        }
+
+        function iniciarCooldownReenvio(btn, segundos = 60) {
+            btn.disabled = true;
+            let restante = segundos;
+            const textoOriginal = 'Reenviar';
+
+            const intervalo = setInterval(() => {
+                restante--;
+                if (restante <= 0) {
+                    clearInterval(intervalo);
+                    btn.disabled = false;
+                    btn.innerHTML = textoOriginal;
+                } else {
+                    btn.innerHTML = `Reenviar (${restante}s)`;
+                }
+            }, 1000);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // INICIALIZACIÓN
+        // ════════════════════════════════════════════════════════════════
+
+        document.addEventListener('DOMContentLoaded', () => {
+            configurarOTPInputs();
+        });
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarAuth();
+            }
+        });
+    </script>
+</body>
+</html>
