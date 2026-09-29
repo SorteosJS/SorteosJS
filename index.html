@@ -593,7 +593,7 @@
 
         const AuthManager = {
             async login() { if(State.isProcessing) return; const e = document.getElementById('login-email').value, p = document.getElementById('login-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-login'); btn.disabled = true; const { data, error } = await sb.auth.signInWithPassword({ email: e, password: p }); if(error) { UI.notify(error.message, "error"); btn.disabled = false; } else { State.user = data.user; updateLastLogin().then(() => location.reload()).catch(() => location.reload()); } },
-            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; const refParam = new URLSearchParams(window.location.search).get('ref') || ''; const { data, error } = await sb.auth.signUp({ email: e, password: p, options: { data: { referido_por: refParam } } }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
+            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; const refParam = new URLSearchParams(window.location.search).get('ref') || ''; const { data, error } = await sb.auth.signUp({ email: e, password: p, options: { } }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
             async logout() { PresenceTracker.leave(); await sb.auth.signOut(); location.reload(); },
             switchTab(tab) { playSfx('click'); document.getElementById('login-container').classList.toggle('hidden-view', tab==='register'); document.getElementById('register-container').classList.toggle('hidden-view', tab==='login'); }
         };
@@ -1239,8 +1239,11 @@
         // ── CARRUSEL HERO (auto-gira — desactivado, usa el bloque de abajo con 3 slides) ──
 
         // ── OTP EMAIL VERIFICATION ──────────────────────────────────────
+        let isVerifyingOTP = false;
+
         const OTPManager = {
             mostrarVerificacion(email) {
+                isVerifyingOTP = false;
                 document.getElementById('login-container').classList.add('hidden-view');
                 document.getElementById('register-container').classList.add('hidden-view');
                 document.getElementById('verify-email-container').classList.remove('hidden-view');
@@ -1256,7 +1259,11 @@
                     input.oninput = () => {
                         input.value = input.value.replace(/\D/g, '');
                         if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
-                        if (Array.from(inputs).map(i => i.value).join('').length === 6) verificarOTP();
+                        const codigo = Array.from(inputs).map(i => i.value).join('');
+                        if (codigo.length === 6 && !isVerifyingOTP) {
+                            isVerifyingOTP = true;
+                            verificarOTP();
+                        }
                     };
                     input.onkeydown = (e) => {
                         if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
@@ -1265,11 +1272,15 @@
                         e.preventDefault();
                         const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
                         inputs.forEach((inp, i) => inp.value = paste[i] || '');
-                        if (paste.length === 6) verificarOTP();
+                        if (paste.length === 6 && !isVerifyingOTP) {
+                            isVerifyingOTP = true;
+                            verificarOTP();
+                        }
                     };
                 });
             },
             volverRegistro() {
+                isVerifyingOTP = false;
                 document.getElementById('verify-email-container').classList.add('hidden-view');
                 document.getElementById('register-container').classList.remove('hidden-view');
             }
@@ -1278,42 +1289,100 @@
         async function verificarOTP() {
             const inputs = document.querySelectorAll('.otp-input');
             const codigo = Array.from(inputs).map(i => i.value).join('');
-            if (codigo.length < 6) return;
-            const email = document.getElementById('verify-email-address').innerText;
-            const btn = document.getElementById('btn-verificar-otp');
-            btn.disabled = true; btn.innerText = 'Verificando...';
-            const { data, error } = await sb.auth.verifyOtp({ email, token: codigo, type: 'signup' });
-            btn.disabled = false; btn.innerText = 'Verificar Código';
-            if (error) {
-                document.getElementById('otp-error').classList.remove('hidden-view');
-                inputs.forEach(i => { i.value = ''; i.style.borderColor = '#ef4444'; setTimeout(() => i.style.borderColor = '', 2000); });
-                inputs[0].focus();
+            if (codigo.length < 6) {
+                isVerifyingOTP = false;
                 return;
             }
-            // Cuenta verificada: insertar en tabla usuarios y continuar
-            if (data.user) {
-                try { await sb.from('usuarios').upsert([{ id: data.user.id, email: data.user.email, saldo: 0 }]); } catch(e) {}
-                State.user = data.user;
-                updateLastLogin();
-                startHeartbeat();
+            const email = document.getElementById('verify-email-address').innerText;
+            const btn = document.getElementById('btn-verificar-otp');
+            btn.disabled = true; 
+            btn.innerText = 'Verificando...';
+            
+            try {
+                const { data, error } = await sb.auth.verifyOtp({ email, token: codigo, type: 'signup' });
+                btn.disabled = false; 
+                btn.innerText = 'Verificar Código';
+                
+                if (error) {
+                    isVerifyingOTP = false;
+                    document.getElementById('otp-error').classList.remove('hidden-view');
+                    inputs.forEach(i => { i.value = ''; i.classList.add('border-red-500'); setTimeout(() => i.classList.remove('border-red-500'), 2000); });
+                    inputs[0].focus();
+                    return;
+                }
+                
+                // Cuenta verificada: insertar en tabla usuarios
+                if (data.user) {
+                    try { 
+                        await sb.from('usuarios').upsert([{ id: data.user.id, email: data.user.email, saldo: 30 }]); 
+                    } catch(e) {
+                        console.error('Error insertando usuario:', e);
+                    }
+                    State.user = data.user;
+                    State.balance = 30;
+                    updateLastLogin();
+                    startHeartbeat();
+                }
+                document.getElementById('auth-view').classList.add('hidden-view');
+                document.getElementById('main-app').classList.remove('hidden-view');
+                UI.updateBalance();
+                UI.notify('¡Cuenta verificada! Bienvenido 🎉', 'success');
+            } catch(err) {
+                isVerifyingOTP = false;
+                console.error('Error en verificarOTP:', err);
+                UI.notify('Error al verificar. Intenta de nuevo.', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Verificar Código';
             }
-            document.getElementById('auth-view').classList.add('hidden-view');
-            document.getElementById('bonus-view').classList.remove('hidden-view');
-            UI.notify('¡Cuenta verificada! Bienvenido 🎉', 'success');
+        }
+
+        function iniciarCooldownReenvio(segundos = 60) {
+            const btn = document.getElementById('btn-reenviar-codigo');
+            if (!btn) return;
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'pointer-events-none');
+            let restante = segundos;
+            btn.innerText = `Reenviar (${restante}s)`;
+            const intervalo = setInterval(() => {
+                restante--;
+                if (restante <= 0) {
+                    clearInterval(intervalo);
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                    btn.innerText = 'Reenviar';
+                } else {
+                    btn.innerText = `Reenviar (${restante}s)`;
+                }
+            }, 1000);
         }
 
         async function reenviarCodigo() {
+            const btn = document.getElementById('btn-reenviar-codigo');
+            if (btn.disabled) return; // Prevenir múltiples clics
+            
             const email = document.getElementById('verify-email-address').innerText;
-            const { error } = await sb.auth.resend({ type: 'signup', email });
-            if (error) UI.notify('Error al reenviar. Intenta de nuevo.', 'error');
-            else UI.notify('¡Código reenviado! Revisa tu correo o spam.', 'success');
+            btn.disabled = true;
+            btn.innerText = 'Reenviando...';
+            
+            try {
+                const { error } = await sb.auth.resend({ type: 'signup', email });
+                if (error) {
+                    UI.notify('Error al reenviar. Intenta de nuevo en 60s.', 'error');
+                    btn.disabled = false;
+                    btn.innerText = 'Reenviar';
+                } else {
+                    UI.notify('¡Código reenviado! Revisa tu correo o spam.', 'success');
+                    iniciarCooldownReenvio(60);
+                }
+            } catch(err) {
+                UI.notify('Error de conexión. Intenta de nuevo.', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Reenviar';
+            }
         }
         // ────────────────────────────────────────────────────────────────
 
         // ── MÓDULO REFERIDOS ─────────────────────────────────────────
-        const REFERIDO_BONUS = 15; // $15 MXN para cada uno
-        const BASE_URL_REF = window.location.origin + window.location.pathname;
-
         const Referidos = {
             initialized: false,
 
