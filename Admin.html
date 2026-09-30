@@ -341,7 +341,6 @@
 <script>
 const DB = { url: "https://mcrqjbbcjalyrmsvzogl.supabase.co", key: "sb_publishable_GJia34PtCKRD-nRQOkAI1Q_PcaaQURk" };
 const sb = window.supabase.createClient(DB.url, DB.key);
-const ADMIN_LOGIN_URL = DB.url + "/functions/v1/Index";
 
 const notify = (msg, type = 'success') => {
     const n = document.createElement('div');
@@ -380,21 +379,30 @@ const Auth = {
         const pass = document.getElementById('admin-pass').value;
         if (!email || !pass) return notify('Ingresa correo y contraseña', 'error');
         const btn = document.getElementById('btn-admin-login');
-        btn.disabled = true; btn.innerText = 'Verificando...';
+        btn.disabled = true; 
+        btn.innerText = 'Verificando...';
         try {
-            const res = await fetch(ADMIN_LOGIN_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': DB.key, 'Authorization': 'Bearer ' + DB.key },
-                body: JSON.stringify({ email, password: pass })
-            });
-            const result = await res.json();
-            if (!res.ok) { notify(result.error || 'No se pudo iniciar sesión', 'error'); btn.disabled = false; btn.innerText = 'Ingresar al Panel'; return; }
-            const { error: setErr } = await sb.auth.setSession({ access_token: result.access_token, refresh_token: result.refresh_token });
-            if (setErr) { notify('Error estableciendo sesión: ' + setErr.message, 'error'); btn.disabled = false; btn.innerText = 'Ingresar al Panel'; return; }
+            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+            if (error) { 
+                notify('Error: ' + error.message, 'error'); 
+                btn.disabled = false; 
+                btn.innerText = 'Ingresar al Panel'; 
+                return; 
+            }
+            if (!data.session) {
+                notify('No se pudo establecer sesión', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Ingresar al Panel';
+                return;
+            }
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             Admin.init();
-        } catch (e) { notify('Error de conexión: ' + e.message, 'error'); btn.disabled = false; btn.innerText = 'Ingresar al Panel'; }
+        } catch (e) { 
+            notify('Error de conexión: ' + e.message, 'error'); 
+            btn.disabled = false; 
+            btn.innerText = 'Ingresar al Panel'; 
+        }
     },
     async logout() { await sb.auth.signOut(); location.reload(); },
     async check() {
@@ -503,14 +511,9 @@ const Admin = {
     async forceDeleteNow(userId) {
         if (!confirm('¿Forzar la eliminación ahora mismo?')) return;
         try {
-            const { data: { session } } = await sb.auth.getSession();
-            const res = await fetch(DB.url + '/functions/v1/admin-delete-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': DB.key, 'Authorization': 'Bearer ' + session.access_token },
-                body: JSON.stringify({ target_user_id: userId })
-            });
-            const result = await res.json();
-            if (!res.ok) throw new Error(result.error || 'Error desconocido');
+            // Eliminar usuario de tabla usuarios
+            const { error: delErr } = await sb.from('usuarios').delete().eq('id', userId);
+            if (delErr) throw new Error(delErr.message || 'Error desconocido');
             notify('✅ Usuario eliminado completamente', 'success');
             await this.loadUsers();
         } catch (e) { notify('Error al forzar eliminación: ' + e.message, 'error'); }
