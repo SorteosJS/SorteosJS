@@ -521,7 +521,7 @@ const Admin = {
 
     historyItems: [],
     async loadHistory() {
-        const { data, error } = await sb.from('history_con_email').select('*').order('created_at', { ascending: false }).limit(500);
+        const { data, error } = await sb.from('history').select('*, usuarios(email)').order('created_at', { ascending: false }).limit(500);
         if (error) { notify('Error cargando historial: ' + error.message, 'error'); return; }
         this.historyItems = data || []; this.renderHistory();
     },
@@ -534,15 +534,19 @@ const Admin = {
         const typeFilter = document.getElementById('history-type-filter')?.value || 'all';
         let filtered = this.historyItems;
         if (typeFilter !== 'all') filtered = filtered.filter(h => h.type === typeFilter);
-        if (term) filtered = filtered.filter(h => (h.email || '').toLowerCase().includes(term));
+        if (term) filtered = filtered.filter(h => {
+            const email = h.usuarios?.email || h.email || '';
+            return email.toLowerCase().includes(term);
+        });
         if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#444;padding:40px;font-size:12px;text-transform:uppercase;">Sin movimientos${term ? ' que coincidan' : ''}</td></tr>`; return; }
         tbody.innerHTML = filtered.map(h => {
+            const email = h.usuarios?.email || h.email || '(sin correo)';
             const sc = h.amount >= 0 ? '#10b981' : '#ef4444';
             const stColor = h.status === 'completed' ? '#10b981' : h.status === 'pending' ? '#fbbf24' : h.status === 'rejected' ? '#ef4444' : '#888';
             const d = h.created_at ? new Date(h.created_at) : null;
             const fecha = d ? `${d.toLocaleDateString('es-MX')}<br>${d.toTimeString().slice(0,5)}` : '—';
             return `<tr>
-                <td style="font-weight:700; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${h.email || ''}">${h.email || '(sin correo)'}</td>
+                <td style="font-weight:700; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${email}">${email}</td>
                 <td style="font-size:9px; color:#888; text-transform:uppercase;">${h.type === 'bets' ? 'Apuesta' : h.type === 'deposits' ? 'Depósito' : h.type}</td>
                 <td style="font-size:10px;">${h.label || '—'}</td>
                 <td style="color:${sc}; font-weight:700;">$${Math.abs(h.amount || 0).toFixed(2)}</td>
