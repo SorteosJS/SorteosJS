@@ -856,7 +856,7 @@ const Transactions = {
         if (isDeposit) {
             query = query.eq('type', 'deposits');
         } else {
-            query = query.in('type', ['withdrawals']).eq('label', 'RETIRO PENDIENTE');
+            query = query.eq('type', 'bets').eq('label', 'RETIRO PENDIENTE');
         }
 
         const { data, error } = await query.order('created_at', { ascending: false });
