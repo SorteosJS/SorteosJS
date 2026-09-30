@@ -190,6 +190,7 @@
         <div class="tabs">
             <div class="tab active" id="tab-matches" onclick="Admin.setTab('matches')">⚽ Partidos</div>
             <div class="tab" id="tab-bets" onclick="Admin.setTab('bets')">📋 Apuestas</div>
+            <div class="tab" id="tab-transactions" onclick="Admin.setTab('transactions')">💳 Transacciones</div>
             <div class="tab" id="tab-users" onclick="Admin.setTab('users')">👤 Usuarios</div>
             <div class="tab" id="tab-history" onclick="Admin.setTab('history')">🧾 Historial</div>
         </div>
@@ -215,6 +216,17 @@
                         <tr><td colspan="7" style="text-align:center; color:#444; padding:40px;">Cargando...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="panel-transactions" style="display:none;">
+            <div class="section-title">Gestión de Transacciones Pendientes</div>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <button class="btn-sm btn-green" id="btn-dep-tab" onclick="Transactions.setType('deposits')" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #10b981; cursor:pointer;">💰 Depósitos</button>
+                <button class="btn-sm btn-gray" id="btn-with-tab" onclick="Transactions.setType('withdrawals')" style="cursor:pointer;">💸 Retiros</button>
+            </div>
+            <div id="transactions-list" style="display:flex; flex-direction:column; gap:12px;">
+                <div style="text-align:center; padding:60px 0; color:#444; font-size:12px; font-weight:700; text-transform:uppercase;">Cargando transacciones...</div>
             </div>
         </div>
 
@@ -807,15 +819,126 @@ const Admin = {
         this.currentTab = tab;
         document.getElementById('panel-matches').style.display = tab === 'matches' ? 'block' : 'none';
         document.getElementById('panel-bets').style.display = tab === 'bets' ? 'block' : 'none';
+        document.getElementById('panel-transactions').style.display = tab === 'transactions' ? 'block' : 'none';
         document.getElementById('panel-users').style.display = tab === 'users' ? 'block' : 'none';
         document.getElementById('panel-history').style.display = tab === 'history' ? 'block' : 'none';
         document.getElementById('tab-matches').classList.toggle('active', tab === 'matches');
         document.getElementById('tab-bets').classList.toggle('active', tab === 'bets');
+        document.getElementById('tab-transactions').classList.toggle('active', tab === 'transactions');
         document.getElementById('tab-users').classList.toggle('active', tab === 'users');
         document.getElementById('tab-history').classList.toggle('active', tab === 'history');
         if (tab === 'bets') this.renderBets();
+        if (tab === 'transactions') Transactions.loadPending();
         if (tab === 'users') this.loadUsers();
         if (tab === 'history') this.loadHistory();
+    }
+};
+
+const Transactions = {
+    currentType: 'deposits',
+    pendingList: [],
+
+    async setType(type) {
+        this.currentType = type;
+        document.getElementById('btn-dep-tab').style.background = type === 'deposits' ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)';
+        document.getElementById('btn-dep-tab').style.borderColor = type === 'deposits' ? 'rgba(16,185,129,0.4)' : 'var(--border)';
+        document.getElementById('btn-dep-tab').style.color = type === 'deposits' ? '#10b981' : '#888';
+        document.getElementById('btn-with-tab').style.background = type === 'withdrawals' ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)';
+        document.getElementById('btn-with-tab').style.borderColor = type === 'withdrawals' ? 'rgba(239,68,68,0.4)' : 'var(--border)';
+        document.getElementById('btn-with-tab').style.color = type === 'withdrawals' ? '#ef4444' : '#888';
+        this.loadPending();
+    },
+
+    async loadPending() {
+        const isDeposit = this.currentType === 'deposits';
+        let query = sb.from('history').select('*, usuarios(saldo)').eq('status', 'pending');
+
+        if (isDeposit) {
+            query = query.eq('type', 'deposits');
+        } else {
+            query = query.in('type', ['withdrawals']).eq('label', 'RETIRO PENDIENTE');
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
+        const container = document.getElementById('transactions-list');
+        
+        if (error) { console.error(error); return; }
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:60px 0; color:#444; font-size:12px; font-weight:700; text-transform:uppercase;">No hay ${isDeposit ? 'depósitos' : 'retiros'} pendientes.</div>`;
+            return;
+        }
+
+        container.innerHTML = data.map(item => {
+            const currentSaldo = item.usuarios ? item.usuarios.saldo : 0;
+            let bancoDisplay = item.bank_name || 'No especificado';
+            let titularDisplay = item.account_holder || 'No especificado';
+            let clabeDisplay = 'No especificado';
+
+            if (!isDeposit && item.account_holder && item.account_holder.includes('| CLABE:')) {
+                const partes = item.account_holder.split('| CLABE:');
+                titularDisplay = partes[0].trim();
+                clabeDisplay = partes[1].trim();
+            }
+
+            return `<div style="background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center;">
+                <div style="display:flex; gap:16px;">
+                    <div style="width:100px; height:100px; background:#222; border-radius:10px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                        ${isDeposit && item.evidence_url ? `<img src="${item.evidence_url}" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" onclick="window.open('${item.evidence_url}')">` : `<div style="text-align:center; font-size:10px; color:#666;"><p>RETIRO</p><p style="color:#ef4444; font-weight:900; margin-top:4px;">PENDIENTE</p></div>`}
+                    </div>
+                    <div>
+                        <p style="color:${isDeposit ? '#10b981' : '#ef4444'}; font-weight:900; font-size:20px;">
+                            ${isDeposit ? '+' : '-'}$${Math.abs(item.amount || 0).toFixed(2)}
+                        </p>
+                        <div style="margin-top:8px; space-y:4px;">
+                            <p style="font-size:9px; color:#666; font-family:monospace;">ID: ${item.user_id}</p>
+                            <p style="font-size:10px; color:#fff; font-weight:700; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; display:inline-block; margin-top:4px;">BANCO: ${bancoDisplay}</p>
+                            <p style="font-size:10px; color:#aaa; margin-top:4px;">TITULAR: ${titularDisplay}</p>
+                            ${!isDeposit ? `<p style="font-size:10px; color:#fbbf24; font-weight:900; background:rgba(251,191,36,0.1); padding:4px 8px; border-radius:4px; display:inline-block; margin-top:4px; font-family:monospace;">CLABE: ${clabeDisplay}</p>` : ''}
+                            <p style="font-size:9px; color:#666; margin-top:6px; text-transform:uppercase;">Saldo actual: $${currentSaldo}</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-direction:column;">
+                    <button onclick="Transactions.approve('${item.id}', '${item.user_id}', ${Math.abs(item.amount || 0)}, ${currentSaldo}, ${isDeposit})" 
+                        style="background:${isDeposit ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}; border:1px solid ${isDeposit ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}; color:${isDeposit ? '#10b981' : '#ef4444'}; padding:10px 20px; border-radius:8px; font-weight:900; font-size:11px; text-transform:uppercase; cursor:pointer;">
+                        ${isDeposit ? '✅ Aprobar' : '✅ Envío OK'}
+                    </button>
+                    <button onclick="Transactions.reject('${item.id}', '${item.user_id}', ${Math.abs(item.amount || 0)}, ${currentSaldo}, ${isDeposit})"
+                        style="background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#888; padding:10px 20px; border-radius:8px; font-weight:900; font-size:11px; text-transform:uppercase; cursor:pointer;">
+                        ❌ Rechazar
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    async approve(historyId, userId, amount, currentSaldo, isDeposit) {
+        if (!confirm(`¿Confirmar ${isDeposit ? 'depósito' : 'retiro'}?`)) return;
+
+        const newSaldo = isDeposit ? (currentSaldo + amount) : currentSaldo;
+        const label = isDeposit ? 'DEPÓSITO APROBADO' : 'RETIRO ENVIADO CORRECTAMENTE';
+
+        const { error: errSaldo } = await sb.from('usuarios').update({ saldo: newSaldo }).eq('id', userId);
+        const { error: errHist } = await sb.from('history').update({ status: 'completed', label: label }).eq('id', historyId);
+
+        if (!errSaldo && !errHist) {
+            alert('✅ Transacción aprobada');
+            this.loadPending();
+        } else {
+            alert('❌ Error: ' + (errSaldo?.message || errHist?.message));
+        }
+    },
+
+    async reject(historyId, userId, amount, currentSaldo, isDeposit) {
+        if (!confirm('¿Rechazar esta solicitud?')) return;
+
+        if (!isDeposit) {
+            await sb.from('usuarios').update({ saldo: currentSaldo + amount }).eq('id', userId);
+        }
+
+        const label = isDeposit ? 'DEPÓSITO RECHAZADO' : 'RETIRO RECHAZADO';
+        await sb.from('history').update({ status: 'rejected', label: label }).eq('id', historyId);
+        this.loadPending();
     }
 };
 
