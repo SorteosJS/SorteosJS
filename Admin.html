@@ -180,7 +180,7 @@
 
     <div class="main">
         <div class="stats-row">
-            <div class="stat-card"><div class="label">Partidos Totales</div><div class="value" id="stat-total">0</div></div>
+            <div class="stat-card" style="display:none;"><div class="label">Partidos Totales</div><div class="value" id="stat-total">0</div></div>
             <div class="stat-card"><div class="label">En Vivo Ahora</div><div class="value red" id="stat-live">0</div></div>
             <div class="stat-card"><div class="label">Apuestas Pendientes</div><div class="value yellow" id="stat-bets">0</div></div>
             <div class="stat-card"><div class="label">Total en Juego (MXN)</div><div class="value green" id="stat-amount">$0</div></div>
@@ -188,7 +188,7 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" id="tab-matches" onclick="Admin.setTab('matches')">⚽ Partidos</div>
+            <div class="tab" id="tab-matches" onclick="Admin.setTab('matches')" style="display:none;">⚽ Partidos</div>
             <div class="tab" id="tab-bets" onclick="Admin.setTab('bets')">📋 Apuestas</div>
             <div class="tab" id="tab-transactions" onclick="Admin.setTab('transactions')">💳 Transacciones</div>
             <div class="tab" id="tab-users" onclick="Admin.setTab('users')">👤 Usuarios</div>
@@ -427,21 +427,24 @@ const Admin = {
     matches: [], bets: [], currentFilter: 'all', currentTab: 'matches',
 
     async init() {
-        await this.loadMatches(); await this.loadBets(); await this.loadUsers(); await this.loadHistory();
+        // await this.loadMatches(); await this.loadBets();  // ← Eliminado: Mundial 2026
+        await this.loadUsers(); await this.loadHistory();
         this.subscribeRealtime(); this.updateStats();
     },
 
-    async loadMatches() {
-        const { data, error } = await sb.from('wc_matches').select('*').order('match_date', { ascending: true });
-        if (error) { notify('Error cargando partidos: ' + error.message, 'error'); return; }
-        this.matches = data || []; this.renderFilters(); this.renderMatches(); this.updateStats();
-    },
+    // ELIMINADO: loadMatches
+    // async loadMatches() {
+    //     const { data, error } = await sb.from('wc_matches').select('*').order('match_date', { ascending: true });
+    //     if (error) { notify('Error cargando partidos: ' + error.message, 'error'); return; }
+    //     this.matches = data || []; this.renderFilters(); this.renderMatches(); this.updateStats();
+    // },
 
-    async loadBets() {
-        const { data, error } = await sb.from('wc_bets').select('*, usuarios(email)').order('created_at', { ascending: false });
-        if (error) { notify('Error cargando apuestas: ' + error.message, 'error'); return; }
-        this.bets = data || []; this.renderBets(); this.renderMatches(); this.updateStats();
-    },
+    // ELIMINADO: loadBets
+    // async loadBets() {
+    //     const { data, error } = await sb.from('wc_bets').select('*, usuarios(email)').order('created_at', { ascending: false });
+    //     if (error) { notify('Error cargando apuestas: ' + error.message, 'error'); return; }
+    //     this.bets = data || []; this.renderBets(); this.renderMatches(); this.updateStats();
+    // },
 
     users: [],
     async loadUsers() {
@@ -569,8 +572,9 @@ const Admin = {
     },
 
     subscribeRealtime() {
-        sb.channel('admin_wc_matches').on('postgres_changes', { event: '*', schema: 'public', table: 'wc_matches' }, () => this.loadMatches()).subscribe();
-        sb.channel('admin_wc_bets').on('postgres_changes', { event: '*', schema: 'public', table: 'wc_bets' }, () => this.loadBets()).subscribe();
+        // ELIMINADO: Subscriptions a wc_matches y wc_bets
+        // sb.channel('admin_wc_matches').on('postgres_changes', { event: '*', schema: 'public', table: 'wc_matches' }, () => this.loadMatches()).subscribe();
+        // sb.channel('admin_wc_bets').on('postgres_changes', { event: '*', schema: 'public', table: 'wc_bets' }, () => this.loadBets()).subscribe();
         sb.channel('admin_usuarios').on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, () => this.loadUsers()).subscribe();
         sb.channel('admin_history').on('postgres_changes', { event: '*', schema: 'public', table: 'history' }, () => this.loadHistory()).subscribe();
         sb.channel('online_users', { config: { presence: { key: 'admin_viewer' } } }).on('presence', { event: 'sync' }, () => this.updateOnlineCount()).subscribe();
