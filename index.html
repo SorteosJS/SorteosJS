@@ -156,6 +156,20 @@
                 <input id="reg-email" type="email" placeholder="Correo electrónico" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white text-sm">
                 <input id="reg-password" type="password" placeholder="Crea una contraseña" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white text-sm">
 
+                <div class="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl">
+                    <p class="text-[9px] font-bold text-emerald-400 mb-3 uppercase tracking-wide">Elige tu moneda:</p>
+                    <div class="flex gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer flex-1 bg-white/5 p-3 rounded-lg border border-white/10 hover:border-emerald-500/50 transition">
+                            <input type="radio" name="currency" value="MXN" id="currency-mxn" class="accent-emerald-500" checked>
+                            <span class="text-[11px] font-bold text-white">🇲🇽 Pesos MXN</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer flex-1 bg-white/5 p-3 rounded-lg border border-white/10 hover:border-blue-500/50 transition">
+                            <input type="radio" name="currency" value="USD" id="currency-usd" class="accent-blue-500">
+                            <span class="text-[11px] font-bold text-white">🇺🇸 Dólares USD</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="bg-white/5 border border-white/5 p-4 rounded-xl space-y-3">
                     <p class="text-[9px] text-zinc-400 leading-relaxed uppercase font-bold">⚠️ AVISO: Riesgo real de capital.</p>
                     <div class="h-24 overflow-y-auto bg-black/20 p-2 rounded text-[8px] text-zinc-500 font-medium leading-tight border border-white/5">
@@ -296,6 +310,35 @@
         </nav>
     </div>
 
+    <!-- TICKET BOTTOM SHEET -->
+        <div class="sheet-handle"></div>
+        <div style="display:flex; align-items:center; gap:10px; padding:16px 20px 12px; flex-shrink:0;">
+            <span style="font-size:20px;">🎫</span>
+            <span style="font-family:'Archivo Black',sans-serif; font-size:13px; color:#10b981; text-transform:uppercase; letter-spacing:1px; flex:1;">Tu Ticket</span>
+            <button onclick="WC.closeTicketModal()" style="width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#aaa; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        </div>
+        <div class="sheet-body">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.15); border-radius:1rem; padding:12px 14px; margin-bottom:14px;">
+                <div>
+                    <span style="font-size:8px; color:#555; font-weight:700; text-transform:uppercase; display:block; margin-bottom:2px;">Cuota Total</span>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:8px; color:#555; font-weight:700; text-transform:uppercase; display:block; margin-bottom:2px;">Ganancia Potencial</span>
+                </div>
+            </div>
+            <!-- Banner bono activo en ticket -->
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    <span style="font-size:1.2rem;">🎁</span>
+                    <div>
+                        <p style="font-size:9px;font-weight:900;color:#fbbf24;text-transform:uppercase;letter-spacing:0.5px;">Bono Activo</p>
+                    </div>
+                </div>
+                <p style="font-size:9px;color:#888;line-height:1.5;">El monto mínimo de apuesta con bono es el monto de tu bono. Las ganancias van directo a tu saldo.</p>
+            </div>
+            <button onclick="WC.placeBet()" class="btn-action w-full py-4 font-casino text-lg" style="margin-bottom:10px;">⚽ APOSTAR TICKET</button>
+            <button onclick="WC.clearSlip()" style="width:100%; font-size:9px; font-weight:900; color:#444; text-transform:uppercase; background:none; border:none; cursor:pointer; padding:4px;">Limpiar selecciones</button>
+        </div>
+    </div>
 
     
 
@@ -445,30 +488,37 @@
 
         // ── DETECTAR PAÍS Y ESTABLECER MONEDA ──
         const detectCountryAndCurrency = async () => {
+            // FALLA SEGURA: siempre defaultea a MXN/MX inmediatamente
+            State.country = 'MX';
+            State.currency = 'MXN';
+            State.currencySymbol = '$';
+            State.isMexico = true;
+            
+            // Intenta obtener país real (opcional, sin bloquear)
             try {
-                const res = await fetch('https://ipapi.co/json/');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if(!res.ok) throw new Error('No disponible');
                 const data = await res.json();
                 const country = data.country_code || 'MX';
-                const currency = country === 'MX' ? 'MXN' : 'USD';
-                const symbol = currency === 'MXN' ? '$' : '$';
-                State.country = country;
-                State.currency = currency;
-                State.currencySymbol = symbol;
-                State.isMexico = country === 'MX';
-                return { country, currency };
+                if(country && country !== 'MX') {
+                    State.country = country;
+                    State.currency = 'USD';
+                    State.isMexico = false;
+                }
             } catch(e) {
-                // Por defecto México si la detección falla
-                State.country = 'MX';
-                State.currency = 'MXN';
-                State.currencySymbol = '$';
-                State.isMexico = true;
-                return { country: 'MX', currency: 'MXN' };
+                // Silencio — ya está defaulteado a MXN/MX
+                console.log('Geo-IP no disponible, usando MXN');
             }
+            
+            return { country: State.country, currency: State.currency };
         };
 
         const AuthManager = {
             async login() { if(State.isProcessing) return; const e = document.getElementById('login-email').value, p = document.getElementById('login-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-login'); btn.disabled = true; const { data, error } = await sb.auth.signInWithPassword({ email: e, password: p }); if(error) { UI.notify(error.message, "error"); btn.disabled = false; } else { State.user = data.user; await Core.loadUserCurrency(); updateLastLogin().then(() => location.reload()).catch(() => location.reload()); } },
-            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; await detectCountryAndCurrency(); const { data, error } = await sb.auth.signUp({ email: e, password: p }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
+            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const selectedCurrency = document.querySelector('input[name="currency"]:checked').value; State.currency = selectedCurrency; State.isMexico = selectedCurrency === 'MXN'; State.country = selectedCurrency === 'MXN' ? 'MX' : 'US'; State.currencySymbol = '$'; const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; const { data, error } = await sb.auth.signUp({ email: e, password: p }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
             async logout() { PresenceTracker.leave(); await sb.auth.signOut(); location.reload(); },
             switchTab(tab) { playSfx('click'); document.getElementById('login-container').classList.toggle('hidden-view', tab==='register'); document.getElementById('register-container').classList.toggle('hidden-view', tab==='login'); }
         };
@@ -1123,9 +1173,17 @@
                 inputs[0].focus();
                 return;
             }
-            // Cuenta verificada: insertar en tabla usuarios con country y currency
+            // Cuenta verificada: insertar en tabla usuarios con moneda elegida
             if (data.user) {
-                try { await sb.from('usuarios').upsert([{ id: data.user.id, email: data.user.email, saldo: 0, country: State.country, currency: State.currency }]); } catch(e) {}
+                try { 
+                    await sb.from('usuarios').upsert([{ 
+                        id: data.user.id, 
+                        email: data.user.email, 
+                        saldo: 0, 
+                        country: State.country || 'MX', 
+                        currency: State.currency || 'MXN' 
+                    }]); 
+                } catch(e) { console.error('Error al guardar usuario:', e); }
                 State.user = data.user;
                 updateLastLogin();
                 startHeartbeat();
