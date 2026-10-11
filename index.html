@@ -74,10 +74,7 @@
         @keyframes carMove { from { top: -50px; } to { top: 250px; } }
 
 
-        .match-card { background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.2rem; padding: 14px; margin-bottom: 12px; transition: all 0.3s ease; }
-        .match-card.has-bet { border-color: rgba(16,185,129,0.4); background: linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(16,185,129,0.02) 100%); }
-        .match-card.settled-win { border-color: rgba(16,185,129,0.6); background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(0,0,0,0.1) 100%); }
-        .match-card.settled-loss { border-color: rgba(239,68,68,0.4); background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(0,0,0,0.1) 100%); }
+
         .odd-btn { flex: 1; padding: 10px 6px; border-radius: 0.8rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); text-align: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
         .odd-btn:active { transform: scale(0.96); }
         .odd-btn.selected { background: linear-gradient(135deg, var(--mx-green) 0%, #059669 100%); border-color: var(--mx-green); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
@@ -310,37 +307,10 @@
         </nav>
     </div>
 
-    <!-- TICKET BOTTOM SHEET -->
+
         <div class="sheet-handle"></div>
         <div style="display:flex; align-items:center; gap:10px; padding:16px 20px 12px; flex-shrink:0;">
-            <span style="font-size:20px;">🎫</span>
-            <span style="font-family:'Archivo Black',sans-serif; font-size:13px; color:#10b981; text-transform:uppercase; letter-spacing:1px; flex:1;">Tu Ticket</span>
-            <button onclick="WC.closeTicketModal()" style="width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#aaa; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
-        </div>
-        <div class="sheet-body">
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.15); border-radius:1rem; padding:12px 14px; margin-bottom:14px;">
-                <div>
-                    <span style="font-size:8px; color:#555; font-weight:700; text-transform:uppercase; display:block; margin-bottom:2px;">Cuota Total</span>
-                </div>
-                <div style="text-align:right;">
-                    <span style="font-size:8px; color:#555; font-weight:700; text-transform:uppercase; display:block; margin-bottom:2px;">Ganancia Potencial</span>
-                </div>
-            </div>
-            <!-- Banner bono activo en ticket -->
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                    <span style="font-size:1.2rem;">🎁</span>
-                    <div>
-                        <p style="font-size:9px;font-weight:900;color:#fbbf24;text-transform:uppercase;letter-spacing:0.5px;">Bono Activo</p>
-                    </div>
-                </div>
-                <p style="font-size:9px;color:#888;line-height:1.5;">El monto mínimo de apuesta con bono es el monto de tu bono. Las ganancias van directo a tu saldo.</p>
-            </div>
-            <button onclick="WC.placeBet()" class="btn-action w-full py-4 font-casino text-lg" style="margin-bottom:10px;">⚽ APOSTAR TICKET</button>
-            <button onclick="WC.clearSlip()" style="width:100%; font-size:9px; font-weight:900; color:#444; text-transform:uppercase; background:none; border:none; cursor:pointer; padding:4px;">Limpiar selecciones</button>
-        </div>
-    </div>
 
-    
 
     <div id="modal-deposit" class="fixed inset-0 bg-black/95 z-[100] hidden-view flex items-center justify-center p-6">
         <div class="glass p-8 w-full max-w-sm bg-[#0a0a0a]">
@@ -734,393 +704,6 @@
         // ========================================================
 
         // ========================================================
-
-        // Los partidos y marcadores los controla el admin en tiempo real
-        // ========================================================
-        const WC = {
-            slip: {},
-            activeTab: 'partidos',
-            currentFilter: 'all',
-            initialized: false,
-            matches: [],
-
-            // ── Cargar partidos desde Supabase ──────────────────
-            async loadMatches(showLoading = false) {
-                if (showLoading) {
-                    const list = document.getElementById('wc-matches-list');
-                    if (list && this.matches.length === 0) {
-                        list.innerHTML = `<div style="text-align:center;padding:40px 0;">
-                            <div style="width:32px;height:32px;border:3px solid rgba(16,185,129,0.3);border-top-color:#10b981;border-radius:50%;margin:0 auto 12px;animation:spin 0.8s linear infinite;"></div>
-                            <p style="font-size:10px;color:#555;font-weight:700;text-transform:uppercase;">Cargando partidos...</p>
-                        </div>`;
-                    }
-                }
-                const { data, error } = await sb
-                    .from('wc_matches')
-                    .select('*')
-                    .order('match_date', { ascending: true });
-
-                if (error) {
-                    const list = document.getElementById('wc-matches-list');
-                    if (list) list.innerHTML = `<div style="text-align:center;padding:40px;">
-                        <p style="font-size:11px;font-weight:900;color:#ef4444;text-transform:uppercase;">Error cargando partidos</p>
-                        <button onclick="WC.loadMatches(true)" style="margin-top:12px;padding:8px 16px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10b981;border-radius:8px;font-size:9px;font-weight:900;text-transform:uppercase;cursor:pointer;">Reintentar</button>
-                    </div>`;
-                    return;
-                }
-
-                this.matches = data || [];
-                this.renderFilters();
-                this.renderMatches();
-                this.checkBetResults();
-            },
-
-            // ── Subscripción Realtime (cambios del admin se ven al instante) ──
-            subscribeRealtime() {
-                sb.channel('wc_live')
-                    .on('postgres_changes', {
-                        event: '*',
-                        schema: 'public',
-                        table: 'wc_matches'
-                    }, (payload) => {
-                        // Actualizar el partido modificado en el array local
-                        const idx = this.matches.findIndex(m => m.id === payload.new?.id || m.id === payload.old?.id);
-                        if (payload.eventType === 'DELETE') {
-                            if (idx !== -1) this.matches.splice(idx, 1);
-                        } else if (payload.new) {
-                            if (idx !== -1) {
-                                this.matches[idx] = payload.new;
-                            } else {
-                                this.matches.push(payload.new);
-                            }
-                        }
-                        this.renderFilters();
-                        this.renderMatches();
-                        this.checkBetResults();
-                        // Notificar si un partido inicia en vivo
-                        // Notificación EN VIVO: solo cuando el admin activa el campo notify_live
-                        if (payload.eventType === 'UPDATE' && payload.new.notify_live === true) {
-                            playSfx('rocket');
-                            UI.notify(`⚽ ${payload.new.home} vs ${payload.new.away} — ¡EN VIVO!`, 'success');
-                        }
-                    })
-                    .subscribe();
-            },
-
-            // ── init ──
-            init() {
-                if (!this.initialized) {
-                    this.initialized = true;
-                    this.loadLocalBets();
-                    this.loadMatches(true);
-                    this.subscribeRealtime();
-                }
-                this.setTab('partidos');
-            },
-
-            setTab(tab) {
-                this.activeTab = tab;
-                ['partidos','mis'].forEach(t => {
-                    document.getElementById(`wc-${t}`).classList.toggle('hidden-view', t !== tab);
-                    document.getElementById(`wc-tab-${t}`).classList.toggle('active', t === tab);
-                });
-                if (tab === 'mis') this.renderMyBets();
-                if (tab === 'partidos') { this.renderMatches(); this.renderInlineTicket(); }
-            },
-
-            renderFilters() {
-                const container = document.getElementById('wc-group-filters');
-                if (!container) return;
-                const groups = ['Todos', ...new Set(
-                    this.matches.map(m => m.group_name).filter(Boolean).sort()
-                )];
-                container.innerHTML = groups.map(g => {
-                    const val = g === 'Todos' ? 'all' : g;
-                    const active = this.currentFilter === val;
-                    return `<button onclick="WC.filterBy('${val}')" style="white-space:nowrap;padding:6px 14px;border-radius:99px;font-size:9px;font-weight:900;text-transform:uppercase;border:1px solid ${active?'var(--mx-green)':'rgba(255,255,255,0.1)'};background:${active?'var(--mx-green)':'rgba(255,255,255,0.03)'};color:${active?'black':'#888'};cursor:pointer;">${g === 'Todos' ? 'Todos' : 'Grupo ' + g}</button>`;
-                }).join('');
-            },
-
-            filterBy(val) {
-                this.currentFilter = val;
-                this.renderFilters();
-                this.renderMatches();
-            },
-
-            renderMatches() {
-                const list = document.getElementById('wc-matches-list');
-                if (!list) return;
-                // Ocultar los partidos FINISHED (ya resueltos)
-                const visible = (this.currentFilter === 'all'
-                    ? this.matches
-                    : this.matches.filter(m => m.group_name === this.currentFilter))
-                    .filter(m => m.status !== 'finished');
-
-                if (visible.length === 0 && this.matches.length > 0) {
-                    list.innerHTML = `<div style="text-align:center;padding:40px;"><div style="font-size:2.5rem;margin-bottom:10px;">⚽</div><p style="font-size:10px;font-weight:900;color:#555;text-transform:uppercase;">No hay partidos activos en este momento</p></div>`;
-                    return;
-                }
-                if (this.matches.length === 0) return;
-
-                // Agrupar por grupo
-                const byGroup = {};
-                visible.forEach(m => {
-                    const key = m.group_name || 'General';
-                    if (!byGroup[key]) byGroup[key] = [];
-                    byGroup[key].push(m);
-                });
-
-                // Live primero dentro de cada grupo
-                Object.keys(byGroup).forEach(k => {
-                    byGroup[k].sort((a, b) => {
-                        const ord = { live: 0, upcoming: 1 };
-                        return (ord[a.status] ?? 1) - (ord[b.status] ?? 1);
-                    });
-                });
-
-                const phaseMap = { 'Grupos':'phase-group','Octavos':'phase-oct','Cuartos':'phase-qtr','Semifinal':'phase-semi','Final':'phase-final' };
-                list.innerHTML = Object.entries(byGroup).map(([group, matches]) => {
-                    const phCls = phaseMap[matches[0]?.phase] || 'phase-group';
-                    return `
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                        <span class="phase-badge ${phCls}">Grupo ${group}</span>
-                        <div style="flex:1;height:1px;background:rgba(255,255,255,0.05);"></div>
-                    </div>
-                    ${matches.map(m => this.matchCard(m)).join('')}`;
-                }).join('');
-            },
-
-            matchCard(m) {
-                const slip = this.slip[m.id];
-                const hasBet = !!slip;
-                const h1Sel = hasBet && slip.pick === '1' ? 'selected' : '';
-                const xSel  = hasBet && slip.pick === 'X' ? 'selected' : '';
-                const h2Sel = hasBet && slip.pick === '2' ? 'selected' : '';
-                const isLive = m.status === 'live';
-
-                const betInfo = hasBet
-                    ? `<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;"><span style="font-size:8px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10b981;padding:3px 8px;border-radius:6px;font-weight:900;text-transform:uppercase;">✓ Tu pick: ${slip.label}</span></div>`
-                    : '';
-
-                return `
-                <div class="match-card ${hasBet ? 'has-bet' : ''}" id="mc-${m.id}">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <span style="font-size:8px;color:#555;font-weight:700;text-transform:uppercase;">${m.match_date || ''} · ${m.match_time || ''}${m.venue ? ' · '+m.venue : ''}</span>
-                        ${isLive
-                            ? `<span style="font-size:8px;font-weight:900;color:#ef4444;display:flex;align-items:center;gap:4px;"><span class="live-pulse" style="width:6px;height:6px;background:#ef4444;border-radius:50%;display:inline-block;"></span>EN VIVO ${m.minute ? m.minute+"'" : ''}</span>`
-                            : ''}
-                    </div>
-                    ${betInfo}
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                        <div style="flex:1;text-align:right;"><span style="font-size:12px;font-weight:900;color:white;">${m.home}</span></div>
-                        ${isLive
-                            ? `<div style="padding:5px 14px;background:rgba(239,68,68,0.12);border-radius:8px;border:1px solid rgba(239,68,68,0.3);min-width:56px;text-align:center;"><span style="font-family:'Archivo Black',sans-serif;font-size:18px;color:white;letter-spacing:4px;">${m.score_home ?? 0} - ${m.score_away ?? 0}</span></div>`
-                            : `<div style="padding:4px 10px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.06);"><span style="font-family:'Archivo Black',sans-serif;font-size:11px;color:#444;">VS</span></div>`}
-                        <div style="flex:1;text-align:left;"><span style="font-size:12px;font-weight:900;color:white;">${m.away}</span></div>
-                    </div>
-                    <div style="display:flex;gap:8px;${(isLive && m.bets_paused) ? 'opacity:0.4;pointer-events:none;' : ''}">
-                        <div class="odd-btn ${h1Sel}" onclick="WC.togglePick('${m.id}','1','${m.home.replace(/'/g,"\\'")}',${m.home_odd})">
-                            <span class="odd-label">1 Local</span><span class="odd-value">${(m.home_odd||2).toFixed(2)}</span>
-                        </div>
-                        <div class="odd-btn ${xSel}" onclick="WC.togglePick('${m.id}','X','Empate',${m.draw_odd})">
-                            <span class="odd-label">X Empate</span><span class="odd-value">${(m.draw_odd||3.2).toFixed(2)}</span>
-                        </div>
-                        <div class="odd-btn ${h2Sel}" onclick="WC.togglePick('${m.id}','2','${m.away.replace(/'/g,"\\'")}',${m.away_odd})">
-                            <span class="odd-label">2 Visitante</span><span class="odd-value">${(m.away_odd||3.5).toFixed(2)}</span>
-                        </div>
-                    </div>
-                    ${(isLive && m.bets_paused) ? `<div style="text-align:center;margin-top:8px;font-size:9px;color:#ef4444;font-weight:700;text-transform:uppercase;">⏸ Apuestas pausadas temporalmente</div>` : (isLive ? `<div style="text-align:center;margin-top:8px;font-size:9px;color:#10b981;font-weight:700;text-transform:uppercase;">⚽ EN VIVO — Apuestas abiertas</div>` : '')}
-                </div>`;
-            },
-
-            togglePick(matchId, pick, label, odd) {
-                playSfx('click');
-                const m = this.matches.find(x => x.id === matchId);
-                if (!m || m.status === 'finished') return;
-                if (m.status === 'live' && m.bets_paused) return UI.notify("⏸ Apuestas pausadas en este partido", "error");
-                if (this.slip[matchId] && this.slip[matchId].pick === pick) {
-                    delete this.slip[matchId];
-                } else {
-                    this.slip[matchId] = { pick, label, odd, matchHome: m.home, matchAway: m.away, date: m.match_date, time: m.match_time };
-                }
-                this.updateTicketCount();
-                const card = document.getElementById(`mc-${matchId}`);
-                if (card) { const d = document.createElement('div'); d.innerHTML = this.matchCard(m); card.replaceWith(d.firstElementChild); }
-                this.renderInlineTicket();
-            },
-
-            updateTicketCount() {
-                const count = Object.keys(this.slip).length;
-                const el = document.getElementById('wc-ticket-count');
-                if (el) el.innerText = count + (count === 1 ? ' selección' : ' selecciones');
-            },
-
-            getTotalOdd() {
-                return Object.values(this.slip).reduce((acc, s) => acc * s.odd, 1);
-            },
-
-            updatePotential() {
-                const amt = parseFloat(document.getElementById('wc-bet-amount')?.value) || 0;
-                const totalOdd = this.getTotalOdd();
-                const el1 = document.getElementById('wc-total-odd');
-                const el2 = document.getElementById('wc-potential-win');
-                if (el1) el1.innerText = totalOdd.toFixed(2) + 'x';
-                if (el2) el2.innerText = `$${(amt * totalOdd).toFixed(2)}`;
-            },
-
-            openTicketSheet() {
-                document.getElementById('wc-ticket-sheet').classList.add('sheet-open');
-                document.getElementById('wc-ticket-overlay').classList.add('sheet-open');
-            },
-
-            renderInlineTicket() {
-                const items = Object.entries(this.slip);
-                const slipItemsEl = document.getElementById('wc-slip-items');
-
-                if (slipItemsEl) {
-                    slipItemsEl.innerHTML = items.map(([matchId, s]) => `
-                        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.3);border-radius:0.7rem;padding:8px 10px;margin-bottom:6px;">
-                            <div>
-                                <span style="font-size:8px;color:#555;font-weight:700;display:block;">${s.matchHome} vs ${s.matchAway}</span>
-                                <span style="font-size:10px;font-weight:900;color:white;">${s.label}</span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <span style="font-family:'Archivo Black',sans-serif;color:#10b981;font-size:14px;">${s.odd.toFixed(2)}</span>
-                                <button onclick="WC.removePick('${matchId}')" style="color:#555;font-size:16px;background:none;border:none;cursor:pointer;line-height:1;">✕</button>
-                            </div>
-                        </div>`).join('');
-                }
-                this.updateTicketCount();
-                this.updatePotential();
-                if (items.length > 0) {
-                    document.getElementById('wc-ticket-sheet').classList.add('sheet-open');
-                    document.getElementById('wc-ticket-overlay').classList.add('sheet-open');
-                }
-            },
-
-            closeTicketModal() {
-                document.getElementById('wc-ticket-sheet').classList.remove('sheet-open');
-                document.getElementById('wc-ticket-overlay').classList.remove('sheet-open');
-            },
-
-            renderSlip() { this.renderInlineTicket(); },
-
-            removePick(matchId) {
-                delete this.slip[matchId];
-                const m = this.matches.find(x => x.id === matchId);
-                if (m) {
-                    const card = document.getElementById(`mc-${matchId}`);
-                    if (card) { const d = document.createElement('div'); d.innerHTML = this.matchCard(m); card.replaceWith(d.firstElementChild); }
-                }
-                if (Object.keys(this.slip).length === 0) { this.closeTicketModal(); this.updateTicketCount(); }
-                else this.renderInlineTicket();
-            },
-
-            clearSlip() {
-                const prev = {...this.slip};
-                this.slip = {};
-                this.closeTicketModal();
-                this.updateTicketCount();
-                Object.keys(prev).forEach(matchId => {
-                    const m = this.matches.find(x => x.id === matchId);
-                    if (m) {
-                        const card = document.getElementById(`mc-${matchId}`);
-                        if (card) { const d = document.createElement('div'); d.innerHTML = this.matchCard(m); card.replaceWith(d.firstElementChild); }
-                    }
-                });
-            },
-
-            async placeBet() {
-                if (State.isProcessing) return;
-                const amt = parseFloat(document.getElementById('wc-bet-amount').value);
-                if (!amt || amt < 10) return UI.notify("Apuesta mínima $10 MXN", "error");
-                if (Object.keys(this.slip).length === 0) return UI.notify("Agrega al menos un partido", "error");
-
-
-                State.isProcessing = true;
-                try {
-                    const totalOdd = this.getTotalOdd();
-                    const potentialWin = amt * totalOdd;
-                    const picks = Object.entries(this.slip).map(([id, s]) => ({
-                        matchId: id, pick: s.pick, label: s.label, odd: s.odd,
-                        matchHome: s.matchHome, matchAway: s.matchAway
-                    }));
-                    await Core.updateBalanceDB(-amt);
-                    State.balance -= amt;
-                    UI.updateBalance();
-                    await Core.recordHistory({
-                        user_id: State.user.id, type: 'bets', amount: -amt,
-                        label: `APUESTA x${totalOdd.toFixed(2)}`,
-                        status: 'pending'
-                    });
-                    playSfx('win');
-                    UI.notify(`✅ Apuesta registrada. Ganancia potencial: $${potentialWin.toFixed(2)}`, "success");
-                    this.clearSlip();
-                } catch(e) {
-                    UI.notify("Error: " + e.message, "error");
-                } finally { State.isProcessing = false; }
-            },
-
-            loadLocalBets() { /* compatibilidad — ahora las apuestas van a Supabase */ },
-
-            // ── Verificar resultados cuando el admin marca un partido ──
-            checkBetResults() {
-                // No necesario en el cliente: el admin panel paga directamente
-                // Esto es solo para refrescar la UI de "Mis Apuestas"
-                if (this.activeTab === 'mis') this.renderMyBets();
-            },
-
-            async renderMyBets() {
-                const list = document.getElementById('wc-my-bets-list');
-                if (!list || !State.user) return;
-                list.innerHTML = `<div style="text-align:center;padding:20px;"><div style="width:24px;height:24px;border:2px solid rgba(16,185,129,0.3);border-top-color:#10b981;border-radius:50%;margin:0 auto;animation:spin 0.8s linear infinite;"></div></div>`;
-                const { data: bets } = await sb
-                    .from('wc_bets')
-                    .select('*')
-                    .eq('user_id', State.user.id)
-                    .order('created_at', { ascending: false });
-                if (!bets || bets.length === 0) {
-                    list.innerHTML = `<div style="text-align:center;padding:48px 0;"><div style="font-size:3rem;margin-bottom:12px;">📋</div><p style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;">Sin apuestas aún</p></div>`;
-                    return;
-                }
-                list.innerHTML = bets.map(b => {
-                    const sc = b.status === 'won' ? '#10b981' : b.status === 'lost' ? '#ef4444' : '#fbbf24';
-                    const st = b.status === 'won' ? '✅ GANADO' : b.status === 'lost' ? '❌ PERDIDO' : '⏳ PENDIENTE';
-                    const d  = new Date(b.created_at);
-                    const picks = b.picks || [];
-                    return `
-                    <div class="match-card ${b.status === 'won' ? 'settled-win' : b.status === 'lost' ? 'settled-loss' : 'has-bet'}" style="margin-bottom:12px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                            <span style="font-size:8px;color:#555;font-weight:700;text-transform:uppercase;">${d.toLocaleDateString('es-MX')} ${d.toTimeString().slice(0,5)}</span>
-                            <span style="font-size:9px;font-weight:900;color:${sc};text-transform:uppercase;">${st}</span>
-                        </div>
-                        ${picks.map(p => `
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-                            <div>
-                                <span style="font-size:8px;color:#555;font-weight:700;">${p.matchHome} vs ${p.matchAway}</span>
-                                <div style="font-size:10px;font-weight:900;color:white;">${p.label}</div>
-                            </div>
-                            <span style="font-family:'Archivo Black',sans-serif;color:#10b981;font-size:12px;">${p.odd.toFixed(2)}</span>
-                        </div>`).join('')}
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
-                            <div>
-                                <span style="font-size:8px;color:#555;font-weight:700;text-transform:uppercase;">Apostado</span>
-                                <div style="font-family:'Archivo Black',sans-serif;color:white;font-size:14px;">$${(b.amount||0).toFixed(2)}</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <span style="font-size:8px;color:#555;font-weight:700;text-transform:uppercase;">Cuota · Potencial</span>
-                                <div style="font-family:'Archivo Black',sans-serif;color:${sc};font-size:14px;">${(b.total_odd||1).toFixed(2)}x · $${(b.potential_win||0).toFixed(2)}</div>
-                            </div>
-                        </div>
-                        ${b.status === 'won' ? `<div style="margin-top:8px;text-align:center;font-size:11px;font-weight:900;color:#10b981;background:rgba(16,185,129,0.08);padding:8px;border-radius:0.8rem;">🏆 GANASTE $${(b.potential_win||0).toFixed(2)}</div>` : ''}
-                    </div>`;
-                }).join('');
-            }
-        };
-
-
-        // ── CARRUSEL HERO (auto-gira — desactivado, usa el bloque de abajo con 3 slides) ──
-
         // ── OTP EMAIL VERIFICATION ──────────────────────────────────────
         const OTPManager = {
             mostrarVerificacion(email) {
@@ -1223,9 +806,9 @@
 
             // Mostrar/ocultar banner y configurar input
             actualizarUI() {
-                const banner    = document.getElementById('wc-bono-banner');
-                const label     = document.getElementById('wc-bono-label');
-                const input     = document.getElementById('wc-bet-amount');
+                const banner    = null; // Elemento no existe (fue eliminado con WC)
+                const label     = null; // Elemento no existe (fue eliminado con WC)
+                const input     = null; // Elemento no existe (fue eliminado con WC)
                 const depBanner = document.getElementById('dep-bono-banner');
 
                 if (this.bono && this.bono.status === 'active') {
@@ -1233,7 +816,6 @@
                     if (label)  label.innerText = `Bono de $${this.bono.amount.toFixed(2)} MXN activado 🎁`;
                     if (input)  { input.min = this.bono.amount; input.value = this.bono.amount; input.placeholder = `Mínimo $${this.bono.amount} (bono activo)`; }
                     if (depBanner) depBanner.style.display = 'none';
-                    WC.updatePotential();
                 } else {
                     if (banner) banner.style.display = 'none';
                     if (input)  { input.min = 10; input.placeholder = 'Monto a apostar ($10 mín)'; }
@@ -1248,8 +830,8 @@
 
             irAApostar() {
                 document.getElementById('modal-bono-activado').classList.add('hidden-view');
-                Router.showView('mundial');
-                setTimeout(() => { this.actualizarUI(); WC.openTicketSheet && WC.openTicketSheet(); }, 400);
+                // Router.showView('mundial'); -- Módulo world cup eliminado
+                setTimeout(() => { this.actualizarUI(); }, 400);
             },
 
             mostrarModal(monto) {
@@ -1453,9 +1035,7 @@
             const modalBonoTC = document.getElementById('modal-bono-tc');
             const modalBonoActivado = document.getElementById('modal-bono-activado');
             const isVisible = (el) => el && !el.classList.contains('hidden-view');
-            const ticketSheet = document.getElementById('wc-ticket-sheet');
-            const ticketOpen = ticketSheet && ticketSheet.classList.contains('sheet-open');
-            if (isVisible(authView) || isVisible(modalDep) || isVisible(viewGame) || isVisible(modalBonoTC) || isVisible(modalBonoActivado) || ticketOpen) {
+            if (isVisible(authView) || isVisible(modalDep) || isVisible(viewGame) || isVisible(modalBonoTC) || isVisible(modalBonoActivado)) {
                 container.style.setProperty('display', 'none', 'important');
             } else {
                 container.style.setProperty('display', 'block', 'important');
