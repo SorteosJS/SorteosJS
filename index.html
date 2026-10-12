@@ -131,7 +131,7 @@
         <div class="glass p-10 w-full max-w-sm text-center animate__animated animate__zoomIn">
             <div class="text-6xl mb-6">🎁</div>
             <h2 class="text-2xl font-casino italic mb-2 text-emerald-500">¡Felicidades!</h2>
-            <p class="text-sm font-bold text-zinc-300 mb-8 uppercase tracking-tighter">Has recibido <span class="text-white">$30 MXN</span> por registrarte.</p>
+            <p class="text-sm font-bold text-zinc-300 mb-8 uppercase tracking-tighter">Has recibido <span class="text-white" id="bonus-text-modal">$30 MXN</span> por registrarte.</p>
             <button onclick="Core.claimBonus()" class="btn-action w-full py-5 font-casino text-xl shadow-[0_0_30px_rgba(16,185,129,0.3)]">Reclamar</button>
         </div>
     </div>
@@ -148,7 +148,7 @@
         </div>
         <div id="register-container" class="hidden-view glass p-5 w-full max-w-sm text-center animate__animated animate__fadeIn">
             <h2 class="text-xl font-casino mb-1 italic tracking-tighter text-emerald-500">Nueva Cuenta</h2>
-            <p class="text-[9px] font-black text-white/50 mb-3 uppercase tracking-widest">Regístrate y recibe <span class="text-emerald-500">$30 MXN</span></p>
+            <p class="text-[9px] font-black text-white/50 mb-3 uppercase tracking-widest">Regístrate y recibe <span class="text-emerald-500" id="bonus-text-register">$30 MXN</span></p>
             <div class="space-y-2 text-left">
                 <input id="reg-email" type="email" placeholder="Correo electrónico" class="w-full bg-white/5 border border-white/10 p-3 rounded-lg outline-none text-white text-xs">
                 <input id="reg-password" type="password" placeholder="Crea una contraseña" class="w-full bg-white/5 border border-white/10 p-3 rounded-lg outline-none text-white text-xs">
@@ -444,11 +444,21 @@
             openModal(id) { if(State.isProcessing) return; playSfx('click'); document.getElementById('dep-amount').value = ''; document.getElementById('bank-name').value = ''; document.getElementById('beneficiary-name').value = ''; document.getElementById('clabe-input-field').value = ''; document.getElementById('receipt-input').value = ''; document.getElementById('file-label').innerText = "Subir Comprobante"; document.getElementById('file-label').classList.replace('text-emerald-500', 'text-zinc-500'); document.getElementById('dep-step-1').classList.remove('hidden-view'); document.getElementById('dep-step-2').classList.add('hidden-view'); this.setTxType('deposit'); document.getElementById(id).classList.remove('hidden-view'); },
             closeModal(id) { playSfx('click'); document.getElementById(id).classList.add('hidden-view'); },
             toggleAccordion(id) { const el = document.getElementById(id); const arrow = document.getElementById('arrow-' + id); el.classList.toggle('hidden-view'); if(arrow) arrow.style.transform = el.classList.contains('hidden-view') ? 'rotate(180deg)' : 'rotate(0deg)'; },
-            depNextStep() { const amt = Math.abs(parseFloat(document.getElementById('dep-amount').value)); const bank = document.getElementById('bank-name').value.trim(); const beneficiary = document.getElementById('beneficiary-name').value.trim(); const isUSD = State.currency === 'USD'; const depMinMax = isUSD ? { min: 50, max: 3000 } : { min: 50, max: 3000 }; const withMinMax = isUSD ? { min: 10, max: 3000 } : { min: 250, max: 3000 }; if(isNaN(amt) || amt <= 0) return this.notify("Monto inválido", "error"); if(State.currentTx === 'deposit') { if(amt < depMinMax.min) return this.notify(`El depósito mínimo es de $${depMinMax.min} ${State.currency}`, "error"); if(amt > depMinMax.max) return this.notify(`El depósito máximo es de $${depMinMax.max} ${State.currency}`, "error"); } if(State.currentTx === 'withdrawal') { if(amt < withMinMax.min) return this.notify(`El retiro mínimo es de $${withMinMax.min} ${State.currency}`, "error"); if(amt > withMinMax.max) return this.notify(`El retiro máximo es de $${withMinMax.max} ${State.currency}`, "error"); } if(!bank) return this.notify("El nombre del banco es obligatorio", "error"); if(!beneficiary) return this.notify("El nombre completo es obligatorio", "error"); let paypalEmail = ""; if(State.currentTx === 'withdrawal') { if(State.isMexico) { const clabeVal = document.getElementById('clabe-input-field').value.trim(); if(!clabeVal || clabeVal.length !== 18) return this.notify("La cuenta CLABE de 18 dígitos es obligatoria", "error"); } else { paypalEmail = document.getElementById('paypal-email-input').value.trim(); if(!paypalEmail || !paypalEmail.includes('@')) return this.notify("Email de PayPal inválido", "error"); } } playSfx('click'); const display = document.getElementById('display-dep-amount'); if(display) display.innerText = `${State.currencySymbol}${amt.toFixed(2)}`; const header = document.getElementById('display-tx-header'); const clabeBox = document.getElementById('display-withdrawal-clabe-box'); if(State.currentTx === 'deposit') { if(header) header.innerText = "Confirmar depósito de:"; if(clabeBox) clabeBox.classList.add('hidden-view'); } else { if(header) header.innerText = "Confirmar retiro de:"; if(clabeBox) { if(State.isMexico) { const clabeVal = document.getElementById('clabe-input-field').value.trim(); clabeBox.innerText = `A la cuenta: ${clabeVal}`; } else { clabeBox.innerText = `A PayPal: ${paypalEmail}`; } clabeBox.classList.remove('hidden-view'); } } document.getElementById('dep-step-1').classList.add('hidden-view'); document.getElementById('dep-step-2').classList.remove('hidden-view'); },
+            depNextStep() { const amt = Math.abs(parseFloat(document.getElementById('dep-amount').value)); const bank = document.getElementById('bank-name').value.trim(); const beneficiary = document.getElementById('beneficiary-name').value.trim(); const isUSD = State.currency === 'USD'; const depMinMax = isUSD ? { min: 2.50, max: 150 } : { min: 50, max: 3000 }; const withMinMax = isUSD ? { min: 12.50, max: 150 } : { min: 250, max: 3000 }; if(isNaN(amt) || amt <= 0) return this.notify("Monto inválido", "error"); if(State.currentTx === 'deposit') { if(amt < depMinMax.min) return this.notify(`El depósito mínimo es de $${depMinMax.min} ${State.currency}`, "error"); if(amt > depMinMax.max) return this.notify(`El depósito máximo es de $${depMinMax.max} ${State.currency}`, "error"); } if(State.currentTx === 'withdrawal') { if(amt < withMinMax.min) return this.notify(`El retiro mínimo es de $${withMinMax.min} ${State.currency}`, "error"); if(amt > withMinMax.max) return this.notify(`El retiro máximo es de $${withMinMax.max} ${State.currency}`, "error"); } if(!bank) return this.notify("El nombre del banco es obligatorio", "error"); if(!beneficiary) return this.notify("El nombre completo es obligatorio", "error"); let paypalEmail = ""; if(State.currentTx === 'withdrawal') { if(State.isMexico) { const clabeVal = document.getElementById('clabe-input-field').value.trim(); if(!clabeVal || clabeVal.length !== 18) return this.notify("La cuenta CLABE de 18 dígitos es obligatoria", "error"); } else { paypalEmail = document.getElementById('paypal-email-input').value.trim(); if(!paypalEmail || !paypalEmail.includes('@')) return this.notify("Email de PayPal inválido", "error"); } } playSfx('click'); const display = document.getElementById('display-dep-amount'); if(display) display.innerText = `${State.currencySymbol}${amt.toFixed(2)}`; const header = document.getElementById('display-tx-header'); const clabeBox = document.getElementById('display-withdrawal-clabe-box'); if(State.currentTx === 'deposit') { if(header) header.innerText = "Confirmar depósito de:"; if(clabeBox) clabeBox.classList.add('hidden-view'); } else { if(header) header.innerText = "Confirmar retiro de:"; if(clabeBox) { if(State.isMexico) { const clabeVal = document.getElementById('clabe-input-field').value.trim(); clabeBox.innerText = `A la cuenta: ${clabeVal}`; } else { clabeBox.innerText = `A PayPal: ${paypalEmail}`; } clabeBox.classList.remove('hidden-view'); } } document.getElementById('dep-step-1').classList.add('hidden-view'); document.getElementById('dep-step-2').classList.remove('hidden-view'); },
             copyClabe() { const clabe = document.getElementById('clabe-number').innerText; navigator.clipboard.writeText(clabe).then(() => { playSfx('click'); this.notify("CLABE Copiada", "success"); }); },
             handleFile(input) { if(input.files && input.files[0]) { playSfx('click'); const label = document.getElementById('file-label'); label.innerText = "Foto lista"; label.classList.replace('text-zinc-500', 'text-emerald-500'); } },
             notify(m, t) { const n = document.createElement('div'); n.className = `p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-2xl animate__animated animate__fadeInDown ${t==='success'?'bg-emerald-500 text-black':'bg-red-500 text-white'}`; n.innerText = m; document.getElementById('notif-container').appendChild(n); setTimeout(() => { n.classList.replace('animate__fadeInDown', 'animate__fadeOutUp'); setTimeout(()=>n.remove(), 500); }, 3000); },
-            setTxType(type) { playSfx('click'); State.currentTx = type; const isDep = type === 'deposit'; document.getElementById('tab-deposit').classList.toggle('active', isDep); document.getElementById('tab-withdrawal').classList.toggle('active', !isDep); const hint = document.getElementById('tx-limits-hint'); const isUSD = State.currency === 'USD'; if(isDep) { hint.innerText = isUSD ? "(MIN $50 USD MAX $3000 USD)" : "(MIN $50 MXN MAX $3000 MXN)"; } else { hint.innerText = isUSD ? "(MIN $10 USD MAX $3000 USD)" : "(MIN $250 MXN MAX $3000 MXN)"; } document.getElementById('photo-section').classList.toggle('hidden-view', !isDep); document.getElementById('clabe-section').classList.toggle('hidden-view', !isDep || !State.isMexico); document.getElementById('deposit-instructions-box').classList.toggle('hidden-view', !isDep); document.getElementById('clabe-input-field').classList.toggle('hidden-view', isDep || !State.isMexico); document.getElementById('paypal-section').classList.toggle('hidden-view', isDep || State.isMexico); }
+            setTxType(type) { playSfx('click'); State.currentTx = type; const isDep = type === 'deposit'; document.getElementById('tab-deposit').classList.toggle('active', isDep); document.getElementById('tab-withdrawal').classList.toggle('active', !isDep); const hint = document.getElementById('tx-limits-hint'); const isUSD = State.currency === 'USD'; if(isDep) { hint.innerText = isUSD ? "(MIN $2.50 USD MAX $150 USD)" : "(MIN $50 MXN MAX $3000 MXN)"; } else { hint.innerText = isUSD ? "(MIN $12.50 USD MAX $150 USD)" : "(MIN $250 MXN MAX $3000 MXN)"; } document.getElementById('photo-section').classList.toggle('hidden-view', !isDep); document.getElementById('clabe-section').classList.toggle('hidden-view', !isDep || !State.isMexico); document.getElementById('deposit-instructions-box').classList.toggle('hidden-view', !isDep); document.getElementById('clabe-input-field').classList.toggle('hidden-view', isDep || !State.isMexico); document.getElementById('paypal-section').classList.toggle('hidden-view', isDep || State.isMexico); }
+        };
+
+        // ── ACTUALIZAR TEXTOS DE BONO SEGÚN MONEDA ──
+        const updateBonusTexts = () => {
+            const bonusAmount = State.currency === 'USD' ? '1.50' : '30';
+            const bonusText = `$${bonusAmount} ${State.currency}`;
+            const el1 = document.getElementById('bonus-text-modal');
+            const el2 = document.getElementById('bonus-text-register');
+            if(el1) el1.innerText = bonusText;
+            if(el2) el2.innerText = bonusText;
         };
 
         // ── DETECTAR PAÍS Y ESTABLECER MONEDA ──
@@ -483,7 +493,7 @@
 
         const AuthManager = {
             async login() { if(State.isProcessing) return; const e = document.getElementById('login-email').value, p = document.getElementById('login-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const btn = document.getElementById('btn-login'); btn.disabled = true; const { data, error } = await sb.auth.signInWithPassword({ email: e, password: p }); if(error) { UI.notify(error.message, "error"); btn.disabled = false; } else { State.user = data.user; await Core.loadUserCurrency(); updateLastLogin().then(() => location.reload()).catch(() => location.reload()); } },
-            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const selectedCurrency = document.querySelector('input[name="currency"]:checked').value; State.currency = selectedCurrency; State.isMexico = selectedCurrency === 'MXN'; State.country = selectedCurrency === 'MXN' ? 'MX' : 'US'; State.currencySymbol = '$'; const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; const { data, error } = await sb.auth.signUp({ email: e, password: p }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
+            async register() { if(State.isProcessing) return; if(!document.getElementById('terms-check').checked) return UI.notify("Acepta términos", "error"); const e = document.getElementById('reg-email').value, p = document.getElementById('reg-password').value; if(!e || !p) return UI.notify("Completa campos", "error"); const selectedCurrency = document.querySelector('input[name="currency"]:checked').value; State.currency = selectedCurrency; State.isMexico = selectedCurrency === 'MXN'; State.country = selectedCurrency === 'MXN' ? 'MX' : 'US'; State.currencySymbol = '$'; updateBonusTexts(); const btn = document.getElementById('btn-register'); btn.disabled = true; btn.innerText = "Registrando..."; const { data, error } = await sb.auth.signUp({ email: e, password: p }); btn.disabled = false; btn.innerText = "Crear Cuenta"; if(error) { UI.notify(error.message, "error"); } else { OTPManager.mostrarVerificacion(e); } },
             async logout() { PresenceTracker.leave(); await sb.auth.signOut(); location.reload(); },
             switchTab(tab) { playSfx('click'); document.getElementById('login-container').classList.toggle('hidden-view', tab==='register'); document.getElementById('register-container').classList.toggle('hidden-view', tab==='login'); }
         };
@@ -808,8 +818,16 @@
 
                 if (this.bono && this.bono.status === 'active') {
                     if (banner) banner.style.display = 'block';
-                    if (label)  label.innerText = `Bono de $${this.bono.amount.toFixed(2)} MXN activado 🎁`;
-                    if (input)  { input.min = this.bono.amount; input.value = this.bono.amount; input.placeholder = `Mínimo $${this.bono.amount} (bono activo)`; }
+                    if (label) {
+                        const montoBonoFinal = State.currency === 'USD' ? (this.bono.amount / 20) : this.bono.amount;
+                        label.innerText = `Bono de $${montoBonoFinal.toFixed(2)} ${State.currency} activado 🎁`;
+                    }
+                    if (input) {
+                        const montoBonoInput = State.currency === 'USD' ? (this.bono.amount / 20) : this.bono.amount;
+                        input.min = montoBonoInput;
+                        input.value = montoBonoInput;
+                        input.placeholder = `Mínimo $${montoBonoInput.toFixed(2)} ${State.currency} (bono activo)`;
+                    }
                     if (depBanner) depBanner.style.display = 'none';
                 } else {
                     if (banner) banner.style.display = 'none';
@@ -831,7 +849,12 @@
 
             mostrarModal(monto) {
                 const el = document.getElementById('bono-activado-monto');
-                if (el) el.innerText = `$${parseFloat(monto).toFixed(2)} MXN`;
+                if (el) {
+                    const montoNum = parseFloat(monto);
+                    // Si es USD, convertir de MXN (monto en BD es siempre en moneda nativa)
+                    const montoFinal = State.currency === 'USD' ? (montoNum / 20) : montoNum;
+                    el.innerText = `$${montoFinal.toFixed(2)} ${State.currency}`;
+                }
                 document.getElementById('modal-bono-activado').classList.remove('hidden-view');
                 playSfx('win');
             },
